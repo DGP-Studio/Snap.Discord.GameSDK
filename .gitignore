@@ -1,0 +1,5 @@
+src/Snap.Discord.GameSDK/.vs
+src/Snap.Discord.GameSDK/bin
+src/Snap.Discord.GameSDK/obj
+
+*.csproj.user

@@ -2,10 +2,10 @@
 
 namespace Snap.Discord.GameSDK;
 
-public partial class StoreManager
+public class StoreManager
 {
     [StructLayout(LayoutKind.Sequential)]
-    internal partial struct FFIEvents
+    internal struct FFIEvents
     {
         [UnmanagedFunctionPointer(CallingConvention.Winapi)]
         internal delegate void EntitlementCreateHandler(IntPtr ptr, ref Entitlement entitlement);
@@ -19,7 +19,7 @@ public partial class StoreManager
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    internal partial struct FFIMethods
+    internal struct FFIMethods
     {
         [UnmanagedFunctionPointer(CallingConvention.Winapi)]
         internal delegate void FetchSkusCallback(IntPtr ptr, Result result);

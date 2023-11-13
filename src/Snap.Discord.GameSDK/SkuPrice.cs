@@ -3,7 +3,7 @@
 namespace Snap.Discord.GameSDK;
 
 [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
-public partial struct SkuPrice
+public struct SkuPrice
 {
     public UInt32 Amount;
 

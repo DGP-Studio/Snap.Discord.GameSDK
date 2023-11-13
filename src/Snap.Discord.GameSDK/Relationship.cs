@@ -3,7 +3,7 @@
 namespace Snap.Discord.GameSDK;
 
 [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
-public partial struct Relationship
+public struct Relationship
 {
     public RelationshipType Type;
 

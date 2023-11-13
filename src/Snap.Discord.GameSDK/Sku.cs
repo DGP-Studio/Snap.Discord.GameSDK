@@ -3,7 +3,7 @@
 namespace Snap.Discord.GameSDK;
 
 [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
-public partial struct Sku
+public struct Sku
 {
     public Int64 Id;
 

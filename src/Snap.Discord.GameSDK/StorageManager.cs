@@ -3,16 +3,16 @@ using System.Text;
 
 namespace Snap.Discord.GameSDK;
 
-public partial class StorageManager
+public class StorageManager
 {
     [StructLayout(LayoutKind.Sequential)]
-    internal partial struct FFIEvents
+    internal struct FFIEvents
     {
 
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    internal partial struct FFIMethods
+    internal struct FFIMethods
     {
         [UnmanagedFunctionPointer(CallingConvention.Winapi)]
         internal delegate Result ReadMethod(IntPtr methodsPtr, [MarshalAs(UnmanagedType.LPStr)] string name, byte[] data, Int32 dataLen, ref UInt32 read);

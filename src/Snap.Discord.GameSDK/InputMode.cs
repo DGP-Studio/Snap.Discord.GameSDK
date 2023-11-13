@@ -3,7 +3,7 @@
 namespace Snap.Discord.GameSDK;
 
 [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
-public partial struct InputMode
+public struct InputMode
 {
     public InputModeType Type;
 

@@ -4,7 +4,7 @@ namespace Snap.Discord.GameSDK;
 
 internal static class DiscordGCHandle
 {
-    public static unsafe nint Alloc<T>(Discord obj)
+    public static unsafe nint Alloc(Discord obj)
     {
         GCHandle handle = GCHandle.Alloc(obj);
         return GCHandle.ToIntPtr(handle);

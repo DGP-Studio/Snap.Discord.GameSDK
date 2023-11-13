@@ -1,6 +1,6 @@
 ﻿namespace Snap.Discord.GameSDK;
 
-public partial struct PartySize
+public struct PartySize
 {
     public int CurrentSize;
 

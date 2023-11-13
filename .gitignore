@@ -1,5 +1,9 @@
+src/.vs
 src/Snap.Discord.GameSDK/.vs
 src/Snap.Discord.GameSDK/bin
 src/Snap.Discord.GameSDK/obj
+
+src/Snap.Discord.GameSDK.SourceGeneration/bin
+src/Snap.Discord.GameSDK.SourceGeneration/obj
 
 *.csproj.user

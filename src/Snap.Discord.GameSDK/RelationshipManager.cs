@@ -2,10 +2,10 @@
 
 namespace Snap.Discord.GameSDK;
 
-public partial class RelationshipManager
+public class RelationshipManager
 {
     [StructLayout(LayoutKind.Sequential)]
-    internal partial struct FFIEvents
+    internal struct FFIEvents
     {
         [UnmanagedFunctionPointer(CallingConvention.Winapi)]
         internal delegate void RefreshHandler(IntPtr ptr);
@@ -19,7 +19,7 @@ public partial class RelationshipManager
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    internal partial struct FFIMethods
+    internal struct FFIMethods
     {
         [UnmanagedFunctionPointer(CallingConvention.Winapi)]
         internal delegate bool FilterCallback(IntPtr ptr, ref Relationship relationship);

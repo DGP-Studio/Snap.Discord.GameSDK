@@ -3,7 +3,7 @@
 namespace Snap.Discord.GameSDK;
 
 [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
-public partial struct Rect
+public struct Rect
 {
     public Int32 Left;
 

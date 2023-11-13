@@ -2,10 +2,10 @@
 
 namespace Snap.Discord.GameSDK;
 
-public partial class OverlayManager
+public class OverlayManager
 {
     [StructLayout(LayoutKind.Sequential)]
-    internal partial struct FFIEvents
+    internal struct FFIEvents
     {
         [UnmanagedFunctionPointer(CallingConvention.Winapi)]
         internal delegate void ToggleHandler(IntPtr ptr, bool locked);
@@ -14,7 +14,7 @@ public partial class OverlayManager
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    internal partial struct FFIMethods
+    internal struct FFIMethods
     {
         [UnmanagedFunctionPointer(CallingConvention.Winapi)]
         internal delegate void IsEnabledMethod(IntPtr methodsPtr, ref bool enabled);

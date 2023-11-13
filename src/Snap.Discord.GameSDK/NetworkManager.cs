@@ -1,224 +1,130 @@
-﻿using System.Runtime.InteropServices;
+﻿using Snap.Discord.GameSDK.ABI;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+using System.Text;
 
 namespace Snap.Discord.GameSDK;
 
-public partial class NetworkManager
+public class NetworkManager
 {
-    [StructLayout(LayoutKind.Sequential)]
-    internal partial struct FFIEvents
-    {
-        [UnmanagedFunctionPointer(CallingConvention.Winapi)]
-        internal delegate void MessageHandler(IntPtr ptr, UInt64 peerId, byte channelId, IntPtr dataPtr, Int32 dataLen);
-
-        [UnmanagedFunctionPointer(CallingConvention.Winapi)]
-        internal delegate void RouteUpdateHandler(IntPtr ptr, [MarshalAs(UnmanagedType.LPStr)] string routeData);
-
-        internal MessageHandler OnMessage;
-
-        internal RouteUpdateHandler OnRouteUpdate;
-    }
-
-    [StructLayout(LayoutKind.Sequential)]
-    internal partial struct FFIMethods
-    {
-        [UnmanagedFunctionPointer(CallingConvention.Winapi)]
-        internal delegate void GetPeerIdMethod(IntPtr methodsPtr, ref UInt64 peerId);
-
-        [UnmanagedFunctionPointer(CallingConvention.Winapi)]
-        internal delegate Result FlushMethod(IntPtr methodsPtr);
-
-        [UnmanagedFunctionPointer(CallingConvention.Winapi)]
-        internal delegate Result OpenPeerMethod(IntPtr methodsPtr, UInt64 peerId, [MarshalAs(UnmanagedType.LPStr)] string routeData);
-
-        [UnmanagedFunctionPointer(CallingConvention.Winapi)]
-        internal delegate Result UpdatePeerMethod(IntPtr methodsPtr, UInt64 peerId, [MarshalAs(UnmanagedType.LPStr)] string routeData);
-
-        [UnmanagedFunctionPointer(CallingConvention.Winapi)]
-        internal delegate Result ClosePeerMethod(IntPtr methodsPtr, UInt64 peerId);
-
-        [UnmanagedFunctionPointer(CallingConvention.Winapi)]
-        internal delegate Result OpenChannelMethod(IntPtr methodsPtr, UInt64 peerId, byte channelId, bool reliable);
-
-        [UnmanagedFunctionPointer(CallingConvention.Winapi)]
-        internal delegate Result CloseChannelMethod(IntPtr methodsPtr, UInt64 peerId, byte channelId);
-
-        [UnmanagedFunctionPointer(CallingConvention.Winapi)]
-        internal delegate Result SendMessageMethod(IntPtr methodsPtr, UInt64 peerId, byte channelId, byte[] data, Int32 dataLen);
-
-        internal GetPeerIdMethod GetPeerId;
-
-        internal FlushMethod Flush;
-
-        internal OpenPeerMethod OpenPeer;
-
-        internal UpdatePeerMethod UpdatePeer;
-
-        internal ClosePeerMethod ClosePeer;
-
-        internal OpenChannelMethod OpenChannel;
-
-        internal CloseChannelMethod CloseChannel;
-
-        internal SendMessageMethod SendMessage;
-    }
-
-    public delegate void MessageHandler(UInt64 peerId, byte channelId, byte[] data);
+    public delegate void MessageHandler(ulong peerId, byte channelId, byte[] data);
 
     public delegate void RouteUpdateHandler(string routeData);
 
-    private IntPtr MethodsPtr;
+    private unsafe readonly NetworkMethods* MethodsPtr;
 
-    private Object MethodsStructure;
+    public event MessageHandler? OnMessage;
 
-    private FFIMethods Methods
+    public event RouteUpdateHandler? OnRouteUpdate;
+
+    internal unsafe NetworkManager(NetworkMethods* ptr, nint eventsPtr, ref NetworkEvents events)
     {
-        get
-        {
-            if (MethodsStructure == null)
-            {
-                MethodsStructure = Marshal.PtrToStructure(MethodsPtr, typeof(FFIMethods));
-            }
-            return (FFIMethods)MethodsStructure;
-        }
-
-    }
-
-    public event MessageHandler OnMessage;
-
-    public event RouteUpdateHandler OnRouteUpdate;
-
-    internal NetworkManager(IntPtr ptr, IntPtr eventsPtr, ref FFIEvents events)
-    {
-        if (eventsPtr == IntPtr.Zero)
-        {
-            throw new ResultException(Result.InternalError);
-        }
+        ResultException.ThrowIfNull(ptr);
         InitEvents(eventsPtr, ref events);
         MethodsPtr = ptr;
-        if (MethodsPtr == IntPtr.Zero)
-        {
-            throw new ResultException(Result.InternalError);
-        }
     }
 
-    private void InitEvents(IntPtr eventsPtr, ref FFIEvents events)
+    private unsafe void InitEvents(nint eventsPtr, ref NetworkEvents events)
     {
-        events.OnMessage = OnMessageImpl;
-        events.OnRouteUpdate = OnRouteUpdateImpl;
-        Marshal.StructureToPtr(events, eventsPtr, false);
+        events.OnMessage = &OnMessageImpl;
+        events.OnRouteUpdate = &OnRouteUpdateImpl;
+        *(NetworkEvents*)eventsPtr = events;
     }
 
     /// <summary>
     /// Get the local peer ID for this process.
     /// </summary>
-    public UInt64 GetPeerId()
+    public unsafe ulong GetPeerId()
     {
-        var ret = new UInt64();
-        Methods.GetPeerId(MethodsPtr, ref ret);
+        ulong ret = default;
+        MethodsPtr->GetPeerId(MethodsPtr, &ret);
         return ret;
     }
 
     /// <summary>
     /// Send pending network messages.
     /// </summary>
-    public void Flush()
+    public unsafe void Flush()
     {
-        var res = Methods.Flush(MethodsPtr);
-        if (res != Result.Ok)
-        {
-            throw new ResultException(res);
-        }
+        MethodsPtr->Flush(MethodsPtr).ThrowOnFailure();
     }
 
     /// <summary>
     /// Open a connection to a remote peer.
     /// </summary>
-    public void OpenPeer(UInt64 peerId, string routeData)
+    public unsafe void OpenPeer(ulong peerId, string routeData)
     {
-        var res = Methods.OpenPeer(MethodsPtr, peerId, routeData);
-        if (res != Result.Ok)
+        byte[] routeDataBytes = Encoding.UTF8.GetBytes(routeData);
+        fixed (byte* pRouteData = routeDataBytes)
         {
-            throw new ResultException(res);
+            MethodsPtr->OpenPeer(MethodsPtr, peerId, pRouteData).ThrowOnFailure();
         }
     }
 
     /// <summary>
     /// Update the route data for a connected peer.
     /// </summary>
-    public void UpdatePeer(UInt64 peerId, string routeData)
+    public unsafe void UpdatePeer(ulong peerId, string routeData)
     {
-        var res = Methods.UpdatePeer(MethodsPtr, peerId, routeData);
-        if (res != Result.Ok)
+        byte[] routeDataBytes = Encoding.UTF8.GetBytes(routeData);
+        fixed (byte* pRouteData = routeDataBytes)
         {
-            throw new ResultException(res);
+            MethodsPtr->UpdatePeer(MethodsPtr, peerId, pRouteData).ThrowOnFailure();
         }
     }
 
     /// <summary>
     /// Close the connection to a remote peer.
     /// </summary>
-    public void ClosePeer(UInt64 peerId)
+    public unsafe void ClosePeer(ulong peerId)
     {
-        var res = Methods.ClosePeer(MethodsPtr, peerId);
-        if (res != Result.Ok)
-        {
-            throw new ResultException(res);
-        }
+        MethodsPtr->ClosePeer(MethodsPtr, peerId).ThrowOnFailure();
     }
 
     /// <summary>
     /// Open a message channel to a connected peer.
     /// </summary>
-    public void OpenChannel(UInt64 peerId, byte channelId, bool reliable)
+    public unsafe void OpenChannel(ulong peerId, byte channelId, bool reliable)
     {
-        var res = Methods.OpenChannel(MethodsPtr, peerId, channelId, reliable);
-        if (res != Result.Ok)
-        {
-            throw new ResultException(res);
-        }
+        MethodsPtr->OpenChannel(MethodsPtr, peerId, channelId, reliable).ThrowOnFailure();
     }
 
     /// <summary>
     /// Close a message channel to a connected peer.
     /// </summary>
-    public void CloseChannel(UInt64 peerId, byte channelId)
+    public unsafe void CloseChannel(ulong peerId, byte channelId)
     {
-        var res = Methods.CloseChannel(MethodsPtr, peerId, channelId);
-        if (res != Result.Ok)
-        {
-            throw new ResultException(res);
-        }
+        MethodsPtr->CloseChannel(MethodsPtr, peerId, channelId).ThrowOnFailure();
     }
 
     /// <summary>
     /// Send a message to a connected peer over an opened message channel.
     /// </summary>
-    public void SendMessage(UInt64 peerId, byte channelId, byte[] data)
+    public unsafe void SendMessage(ulong peerId, byte channelId, byte[] data)
     {
-        var res = Methods.SendMessage(MethodsPtr, peerId, channelId, data, data.Length);
-        if (res != Result.Ok)
+        fixed (byte* pData = data)
         {
-            throw new ResultException(res);
+            MethodsPtr->SendMessage(MethodsPtr, peerId, channelId, pData, data.Length).ThrowOnFailure();
         }
     }
 
-    [MonoPInvokeCallback]
-    private static void OnMessageImpl(IntPtr ptr, UInt64 peerId, byte channelId, IntPtr dataPtr, Int32 dataLen)
+    [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvStdcall) })]
+    private static void OnMessageImpl(nint ptr, ulong peerId, byte channelId, nint dataPtr, int dataLen)
     {
-        GCHandle h = GCHandle.FromIntPtr(ptr);
+        GCHandle h = GCHandle.Fromnint(ptr);
         Discord d = (Discord)h.Target;
         if (d.NetworkManagerInstance.OnMessage != null)
         {
             byte[] data = new byte[dataLen];
-            Marshal.Copy(dataPtr, data, 0, (int)dataLen);
+            Marshal.Copy(dataPtr, data, 0, dataLen);
             d.NetworkManagerInstance.OnMessage.Invoke(peerId, channelId, data);
         }
     }
 
-    [MonoPInvokeCallback]
-    private static void OnRouteUpdateImpl(IntPtr ptr, string routeData)
+    [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvStdcall) })]
+    private static void OnRouteUpdateImpl(nint ptr, byte* routeData)
     {
-        GCHandle h = GCHandle.FromIntPtr(ptr);
+        GCHandle h = GCHandle.Fromnint(ptr);
         Discord d = (Discord)h.Target;
         if (d.NetworkManagerInstance.OnRouteUpdate != null)
         {

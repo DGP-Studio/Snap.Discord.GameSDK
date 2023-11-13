@@ -2,10 +2,10 @@
 
 namespace Snap.Discord.GameSDK;
 
-public partial class VoiceManager
+public class VoiceManager
 {
     [StructLayout(LayoutKind.Sequential)]
-    internal partial struct FFIEvents
+    internal struct FFIEvents
     {
         [UnmanagedFunctionPointer(CallingConvention.Winapi)]
         internal delegate void SettingsUpdateHandler(IntPtr ptr);
@@ -14,7 +14,7 @@ public partial class VoiceManager
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    internal partial struct FFIMethods
+    internal struct FFIMethods
     {
         [UnmanagedFunctionPointer(CallingConvention.Winapi)]
         internal delegate Result GetInputModeMethod(IntPtr methodsPtr, ref InputMode inputMode);

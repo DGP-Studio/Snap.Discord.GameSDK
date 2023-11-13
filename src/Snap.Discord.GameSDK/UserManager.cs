@@ -2,10 +2,10 @@
 
 namespace Snap.Discord.GameSDK;
 
-public partial class UserManager
+public class UserManager
 {
     [StructLayout(LayoutKind.Sequential)]
-    internal partial struct FFIEvents
+    internal struct FFIEvents
     {
         [UnmanagedFunctionPointer(CallingConvention.Winapi)]
         internal delegate void CurrentUserUpdateHandler(IntPtr ptr);
@@ -14,7 +14,7 @@ public partial class UserManager
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    internal partial struct FFIMethods
+    internal struct FFIMethods
     {
         [UnmanagedFunctionPointer(CallingConvention.Winapi)]
         internal delegate Result GetCurrentUserMethod(IntPtr methodsPtr, ref User currentUser);

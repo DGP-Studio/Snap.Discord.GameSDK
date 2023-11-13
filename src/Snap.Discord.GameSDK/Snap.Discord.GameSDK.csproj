@@ -5,7 +5,20 @@
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Platforms>AnyCPU;x64</Platforms>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="ABI\ProtoTypes.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AdditionalFiles Include="ABI\ProtoTypes.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Snap.Discord.GameSDK.SourceGeneration\Snap.Discord.GameSDK.SourceGeneration.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" SetTargetFramework="TargetFramework=netstandard2.0" />
+  </ItemGroup>
 
   <ItemGroup>
     <None Update="discord_game_sdk.dll">

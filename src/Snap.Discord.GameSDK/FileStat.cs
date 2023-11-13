@@ -3,7 +3,7 @@
 namespace Snap.Discord.GameSDK;
 
 [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
-public partial struct FileStat
+public struct FileStat
 {
     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 260)]
     public string Filename;

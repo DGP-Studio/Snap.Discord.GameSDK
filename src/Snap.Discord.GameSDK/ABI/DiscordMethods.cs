@@ -1,6 +1,6 @@
 ﻿namespace Snap.Discord.GameSDK.ABI;
 
-internal struct DiscordMethods
+public struct DiscordMethods
 {
     internal DestroyHandler Destroy;
     internal RunCallbacksMethod RunCallbacks;

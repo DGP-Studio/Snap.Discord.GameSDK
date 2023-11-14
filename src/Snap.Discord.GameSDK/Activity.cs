@@ -1,4 +1,6 @@
-﻿namespace Snap.Discord.GameSDK;
+﻿using System;
+
+namespace Snap.Discord.GameSDK;
 
 public struct Activity
 {
@@ -8,9 +10,39 @@ public struct Activity
 
     public unsafe fixed byte Name[128];
 
+    public unsafe void SetName(ReadOnlySpan<byte> source)
+    {
+        fixed (byte* ptr = Name)
+        {
+            Span<byte> target = new(ptr, 128);
+            target.Clear();
+            source.CopyTo(target);
+        }
+    }
+
     public unsafe fixed byte State[128];
 
+    public unsafe void SetState(ReadOnlySpan<byte> source)
+    {
+        fixed (byte* ptr = State)
+        {
+            Span<byte> target = new(ptr, 128);
+            target.Clear();
+            source.CopyTo(target);
+        }
+    }
+
     public unsafe fixed byte Details[128];
+
+    public unsafe void SetDetails(ReadOnlySpan<byte> source)
+    {
+        fixed (byte* ptr = Details)
+        {
+            Span<byte> target = new(ptr, 128);
+            target.Clear();
+            source.CopyTo(target);
+        }
+    }
 
     public ActivityTimestamps Timestamps;
 

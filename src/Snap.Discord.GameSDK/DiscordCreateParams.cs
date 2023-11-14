@@ -2,7 +2,7 @@
 
 namespace Snap.Discord.GameSDK;
 
-internal struct DiscordCreateParams
+public struct DiscordCreateParams
 {
     internal long ClientId;
 

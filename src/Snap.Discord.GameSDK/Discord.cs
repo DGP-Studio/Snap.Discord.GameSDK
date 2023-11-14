@@ -5,10 +5,10 @@ using System.Runtime.InteropServices;
 
 namespace Snap.Discord.GameSDK;
 
-public sealed class Discord : IDisposable
+public class Discord : IDisposable
 {
     [DllImport("discord_game_sdk", ExactSpelling = true, CallingConvention = CallingConvention.Winapi)]
-    private static extern unsafe Result DiscordCreate(uint version, DiscordCreateParams* createParams, /* out */ DiscordMethods* manager);
+    public static extern unsafe Result DiscordCreate(uint version, DiscordCreateParams* createParams, /* out */ DiscordMethods* manager);
 
     private nint SelfHandle;
 
@@ -88,8 +88,15 @@ public sealed class Discord : IDisposable
 
     internal AchievementManager? AchievementManagerInstance;
 
-    private unsafe readonly DiscordMethods* MethodsPtr;
+    private unsafe DiscordMethods* MethodsPtr;
 
+    private nint padding;
+
+    /// <summary>
+    /// Creates an instance of Discord to initialize the SDK. This is the overlord of all things Discord. We like to call her Nelly.
+    /// </summary>
+    /// <param name="clientId">your application's client id</param>
+    /// <param name="flags">the creation parameters for the SDK</param>
     public unsafe Discord(long clientId, CreateFlags flags)
     {
         DiscordCreateParams createParams = default;
@@ -164,9 +171,12 @@ public sealed class Discord : IDisposable
         createParams.AchievementVersion = 1;
 
         InitEvents(EventsPtr, ref Events);
+        DiscordMethods* methodsPtr = default;
         try
         {
-            DiscordCreate(3, &createParams, MethodsPtr).ThrowOnFailure();
+            DiscordCreate(3, &createParams, methodsPtr).ThrowOnFailure();
+            //DiscordCreate(3, &createParams, methodsPtr).ThrowOnFailure();
+            MethodsPtr = methodsPtr;
         }
         catch
         {
@@ -180,6 +190,9 @@ public sealed class Discord : IDisposable
         *eventsPtr = events;
     }
 
+    /// <summary>
+    /// Destroys the instance. Wave goodbye, Nelly! You monster.
+    /// </summary>
     public unsafe void Dispose()
     {
         if (MethodsPtr is not null)
@@ -204,11 +217,21 @@ public sealed class Discord : IDisposable
         NativeMemory.Free(AchievementEventsPtr);
     }
 
+    /// <summary>
+    /// Runs all pending SDK callbacks. Put this in your game's main event loop, like Update() in Unity. That way, the first thing your game does is check for any new info from Discord.
+    /// <para/>
+    /// This function also serves as a way to know that the local Discord client is still connected. If the user closes Discord while playing your game, RunCallbacks() will return/throw <see cref="Result.NotRunning"/>.
+    /// </summary>
     public unsafe void RunCallbacks()
     {
         MethodsPtr->RunCallbacks.Invoke(MethodsPtr).ThrowOnFailure();
     }
 
+    /// <summary>
+    /// Registers a logging callback function with the minimum level of message to receive. 
+    /// </summary>
+    /// <param name="minLevel">the minimum level of event to log</param>
+    /// <param name="callback">the callback function to catch the messages</param>
     public unsafe void SetLogHook(LogLevel minLevel, SetLogHookHandler callback)
     {
         [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvStdcall) })]
@@ -220,61 +243,93 @@ public sealed class Discord : IDisposable
         MethodsPtr->SetLogHook.Invoke(MethodsPtr, minLevel, callback, SetLogHookCallback.Create(&SetLogHookCallbackImpl));
     }
 
+    [Obsolete]
     public unsafe ApplicationManager GetApplicationManager()
     {
         return ApplicationManagerInstance ??= new ApplicationManager(MethodsPtr->GetApplicationManager.Invoke(MethodsPtr), ApplicationEventsPtr, ref ApplicationEvents);
     }
 
+    /// <summary>
+    /// Fetches an instance of the manager for interfacing with users in the SDK.
+    /// for fetching user data for a given id and the current user
+    /// </summary>
+    /// <returns></returns>
     public unsafe UserManager GetUserManager()
     {
         return UserManagerInstance ??= new UserManager(MethodsPtr->GetUserManager.Invoke(MethodsPtr), UserEventsPtr, ref UserEvents);
     }
 
+    [Obsolete]
     public unsafe ImageManager GetImageManager()
     {
         return ImageManagerInstance ??= new ImageManager(MethodsPtr->GetImageManager.Invoke(MethodsPtr), ImageEventsPtr, ref ImageEvents);
     }
 
+    /// <summary>
+    /// Fetches an instance of the manager for interfacing with activities in the SDK.
+    /// for Rich Presence and game invites
+    /// </summary>
+    /// <returns></returns>
     public unsafe ActivityManager GetActivityManager()
     {
         return ActivityManagerInstance ??= new ActivityManager(MethodsPtr->GetActivityManager.Invoke(MethodsPtr), ActivityEventsPtr, ref ActivityEvents);
     }
 
+    /// <summary>
+    /// Fetches an instance of the manager for interfacing with relationships in the SDK.
+    /// for users' social relationships across Discord, including friends list
+    /// </summary>
+    /// <returns></returns>
     public unsafe RelationshipManager GetRelationshipManager()
     {
         return RelationshipManagerInstance ??= new RelationshipManager(MethodsPtr->GetRelationshipManager.Invoke(MethodsPtr), RelationshipEventsPtr, ref RelationshipEvents);
     }
 
+    [Obsolete]
     public unsafe LobbyManager GetLobbyManager()
     {
         return LobbyManagerInstance ??= new LobbyManager(MethodsPtr->GetLobbyManager.Invoke(MethodsPtr), LobbyEventsPtr, ref LobbyEvents);
     }
 
+    [Obsolete]
     public unsafe NetworkManager GetNetworkManager()
     {
         return NetworkManagerInstance ??= new NetworkManager(MethodsPtr->GetNetworkManager.Invoke(MethodsPtr), NetworkEventsPtr, ref NetworkEvents);
     }
 
+    /// <summary>
+    /// Fetches an instance of the manager for interfacing with the overlay in the SDK.
+    /// for interacting with Discord's built-in overlay
+    /// </summary>
+    /// <returns></returns>
     public unsafe OverlayManager GetOverlayManager()
     {
         return OverlayManagerInstance ??= new OverlayManager(MethodsPtr->GetOverlayManager.Invoke(MethodsPtr), OverlayEventsPtr, ref OverlayEvents);
     }
 
+    [Obsolete]
     public unsafe StorageManager GetStorageManager()
     {
         return StorageManagerInstance ??= new StorageManager(MethodsPtr->GetStorageManager.Invoke(MethodsPtr), StorageEventsPtr, ref StorageEvents);
     }
 
+    /// <summary>
+    /// Fetches an instance of the manager for interfacing with SKUs and Entitlements in the SDK.
+    /// for all things entitlements and SKUs, including IAP
+    /// </summary>
+    /// <returns></returns>
     public unsafe StoreManager GetStoreManager()
     {
         return StoreManagerInstance ??= new StoreManager(MethodsPtr->GetStoreManager.Invoke(MethodsPtr), StoreEventsPtr, ref StoreEvents);
     }
 
+    [Obsolete]
     public unsafe VoiceManager GetVoiceManager()
     {
         return VoiceManagerInstance ??= new VoiceManager(MethodsPtr->GetVoiceManager.Invoke(MethodsPtr), VoiceEventsPtr, ref VoiceEvents);
     }
 
+    [Obsolete]
     public unsafe AchievementManager GetAchievementManager()
     {
         return AchievementManagerInstance ??= new AchievementManager(MethodsPtr->GetAchievementManager.Invoke(MethodsPtr), AchievementEventsPtr, ref AchievementEvents);

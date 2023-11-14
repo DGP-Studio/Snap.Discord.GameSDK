@@ -1,5 +1,4 @@
 ﻿using Snap.Discord.GameSDK.ABI;
-using Snap.Discord.GameSDK.Lobby;
 using System.Text;
 
 namespace Snap.Discord.GameSDK;

@@ -8,38 +8,44 @@ public class AchievementManager
 {
     private unsafe readonly AchievementMethods* MethodsPtr;
 
-    internal unsafe AchievementManager(AchievementMethods* ptr, nint eventsPtr, ref AchievementEvents events)
+    internal unsafe AchievementManager(AchievementMethods* ptr, AchievementEvents* eventsPtr, ref AchievementEvents events)
     {
         ResultException.ThrowIfNull(ptr);
         InitEvents(eventsPtr, ref events);
         MethodsPtr = ptr;
     }
 
-    private static unsafe void InitEvents(nint eventsPtr, ref AchievementEvents events)
+    private static unsafe void InitEvents(AchievementEvents* eventsPtr, ref AchievementEvents events)
     {
-        events.OnUserAchievementUpdate = UserAchievementUpdateHandler.Create(&OnUserAchievementUpdateImpl);
-        *(AchievementEvents*)eventsPtr = events;
-    }
+        [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvStdcall) })]
+        static unsafe void OnUserAchievementUpdateImpl(nint ptr, UserAchievement* userAchievement)
+        {
+            DiscordGCHandle.Get(ptr).AchievementManagerInstance.OnUserAchievementUpdate(ref *userAchievement);
+        }
 
-    [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvStdcall) })]
-    private static unsafe void SetUserAchievementCallbackImpl(SetUserAchievementHandler ptr, Result result)
-    {
-        ptr.Invoke(result);
+        events.OnUserAchievementUpdate = UserAchievementUpdateHandler.Create(&OnUserAchievementUpdateImpl);
+        *eventsPtr = events;
     }
 
     public unsafe void SetUserAchievement(long achievementId, byte percentComplete, SetUserAchievementHandler callback)
     {
-        MethodsPtr->SetUserAchievement.Invoke(MethodsPtr, achievementId, percentComplete, callback, SetUserAchievementCallback.Create(&SetUserAchievementCallbackImpl));
-    }
+        [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvStdcall) })]
+        static unsafe void SetUserAchievementCallbackImpl(SetUserAchievementHandler ptr, Result result)
+        {
+            ptr.Invoke(result);
+        }
 
-    [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvStdcall) })]
-    private static unsafe void FetchUserAchievementsCallbackImpl(FetchUserAchievementsHandler ptr, Result result)
-    {
-        ptr.Invoke(result);
+        MethodsPtr->SetUserAchievement.Invoke(MethodsPtr, achievementId, percentComplete, callback, SetUserAchievementCallback.Create(&SetUserAchievementCallbackImpl));
     }
 
     public unsafe void FetchUserAchievements(FetchUserAchievementsHandler callback)
     {
+        [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvStdcall) })]
+        static unsafe void FetchUserAchievementsCallbackImpl(FetchUserAchievementsHandler ptr, Result result)
+        {
+            ptr.Invoke(result);
+        }
+
         MethodsPtr->FetchUserAchievements.Invoke(MethodsPtr, callback, FetchUserAchievementsCallback.Create(&FetchUserAchievementsCallbackImpl));
     }
 
@@ -66,12 +72,5 @@ public class AchievementManager
 
     protected virtual void OnUserAchievementUpdate(ref UserAchievement userAchievement)
     {
-    }
-
-    [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvStdcall) })]
-    private static unsafe void OnUserAchievementUpdateImpl(nint ptr, UserAchievement* userAchievement)
-    {
-        Discord d = DiscordGCHandle.Get(ptr);
-        d.AchievementManagerInstance.OnUserAchievementUpdate(ref *userAchievement);
     }
 }

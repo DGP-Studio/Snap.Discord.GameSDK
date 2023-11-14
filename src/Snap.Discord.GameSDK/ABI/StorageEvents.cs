@@ -1,5 +1,5 @@
 ﻿namespace Snap.Discord.GameSDK.ABI;
 
-internal struct ImageEvents
+internal struct StorageEvents
 {
 }

@@ -1,16 +1,12 @@
-﻿using System.Runtime.InteropServices;
+﻿namespace Snap.Discord.GameSDK;
 
-namespace Snap.Discord.GameSDK;
-
-[StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
 public struct Sku
 {
-    public Int64 Id;
+    public long Id;
 
     public SkuType Type;
 
-    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 256)]
-    public string Name;
+    public unsafe fixed byte Name[256];
 
     public SkuPrice Price;
 }

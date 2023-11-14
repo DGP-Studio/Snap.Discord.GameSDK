@@ -1,17 +1,14 @@
-﻿using System.Runtime.InteropServices;
+﻿namespace Snap.Discord.GameSDK;
 
-namespace Snap.Discord.GameSDK;
-
-[StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
 public struct ImeUnderline
 {
-    public Int32 From;
+    public int From;
 
-    public Int32 To;
+    public int To;
 
-    public UInt32 Color;
+    public uint Color;
 
-    public UInt32 BackgroundColor;
+    public uint BackgroundColor;
 
     public bool Thick;
 }

@@ -1,15 +1,12 @@
-﻿using System.Runtime.InteropServices;
+﻿namespace Snap.Discord.GameSDK;
 
-namespace Snap.Discord.GameSDK;
-
-[StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
 public struct Rect
 {
-    public Int32 Left;
+    public int Left;
 
-    public Int32 Top;
+    public int Top;
 
-    public Int32 Right;
+    public int Right;
 
-    public Int32 Bottom;
+    public int Bottom;
 }

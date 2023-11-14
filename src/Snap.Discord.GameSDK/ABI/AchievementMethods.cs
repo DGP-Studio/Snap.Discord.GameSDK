@@ -1,6 +1,6 @@
 ﻿namespace Snap.Discord.GameSDK.ABI;
 
-public struct AchievementMethods
+internal struct AchievementMethods
 {
     internal SetUserAchievementMethod SetUserAchievement;
     internal FetchUserAchievementsMethod FetchUserAchievements;

@@ -1,14 +1,10 @@
-﻿using System.Runtime.InteropServices;
+﻿namespace Snap.Discord.GameSDK;
 
-namespace Snap.Discord.GameSDK;
-
-[StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
 public struct FileStat
 {
-    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 260)]
-    public string Filename;
+    public unsafe fixed byte Filename[260];
 
-    public UInt64 Size;
+    public ulong Size;
 
-    public UInt64 LastModified;
+    public ulong LastModified;
 }

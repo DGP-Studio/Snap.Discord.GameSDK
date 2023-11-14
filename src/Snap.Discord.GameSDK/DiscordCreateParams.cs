@@ -16,47 +16,47 @@ internal struct DiscordCreateParams
 
     internal uint ApplicationVersion;
 
-    internal nint UserEvents;
+    internal unsafe UserEvents* UserEvents;
 
     internal uint UserVersion;
 
-    internal nint ImageEvents;
+    internal unsafe ImageEvents* ImageEvents;
 
     internal uint ImageVersion;
 
-    internal nint ActivityEvents;
+    internal unsafe ActivityEvents* ActivityEvents;
 
     internal uint ActivityVersion;
 
-    internal nint RelationshipEvents;
+    internal unsafe RelationshipEvents* RelationshipEvents;
 
     internal uint RelationshipVersion;
 
-    internal nint LobbyEvents;
+    internal unsafe LobbyEvents* LobbyEvents;
 
     internal uint LobbyVersion;
 
-    internal nint NetworkEvents;
+    internal unsafe NetworkEvents* NetworkEvents;
 
     internal uint NetworkVersion;
 
-    internal nint OverlayEvents;
+    internal unsafe OverlayEvents* OverlayEvents;
 
     internal uint OverlayVersion;
 
-    internal nint StorageEvents;
+    internal unsafe StorageEvents* StorageEvents;
 
     internal uint StorageVersion;
 
-    internal nint StoreEvents;
+    internal unsafe StoreEvents* StoreEvents;
 
     internal uint StoreVersion;
 
-    internal nint VoiceEvents;
+    internal unsafe VoiceEvents* VoiceEvents;
 
     internal uint VoiceVersion;
 
-    internal nint AchievementEvents;
+    internal unsafe AchievementEvents* AchievementEvents;
 
     internal uint AchievementVersion;
 }

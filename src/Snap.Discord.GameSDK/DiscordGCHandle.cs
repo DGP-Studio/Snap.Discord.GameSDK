@@ -2,7 +2,7 @@
 
 namespace Snap.Discord.GameSDK;
 
-internal static class DiscordGCHandle
+internal struct DiscordGCHandle
 {
     public static unsafe nint Alloc(Discord obj)
     {

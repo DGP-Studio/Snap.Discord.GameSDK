@@ -9,26 +9,26 @@ public class ApplicationManager
 {
     private unsafe readonly ApplicationMethods* MethodsPtr;
 
-    internal unsafe ApplicationManager(ApplicationMethods* ptr, nint eventsPtr, ref ApplicationEvents events)
+    internal unsafe ApplicationManager(ApplicationMethods* ptr, ApplicationEvents* eventsPtr, ref ApplicationEvents events)
     {
         ResultException.ThrowIfNull(ptr);
         InitEvents(eventsPtr, ref events);
         MethodsPtr = ptr;
     }
 
-    private unsafe static void InitEvents(nint eventsPtr, ref ApplicationEvents events)
+    private unsafe static void InitEvents(ApplicationEvents* eventsPtr, ref ApplicationEvents events)
     {
-        *(ApplicationEvents*)eventsPtr = events;
-    }
-
-    [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvStdcall) })]
-    private static unsafe void ValidateOrExitCallbackImpl(ValidateOrExitHandler ptr, Result result)
-    {
-        ptr.Invoke(result);
+        *eventsPtr = events;
     }
 
     public unsafe void ValidateOrExit(ValidateOrExitHandler callback)
     {
+        [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvStdcall) })]
+        static unsafe void ValidateOrExitCallbackImpl(ValidateOrExitHandler ptr, Result result)
+        {
+            ptr.Invoke(result);
+        }
+
         MethodsPtr->ValidateOrExit.Invoke(MethodsPtr, callback, ValidateOrExitCallback.Create(&ValidateOrExitCallbackImpl));
     }
 
@@ -52,25 +52,25 @@ public class ApplicationManager
         }
     }
 
-    [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvStdcall) })]
-    private static unsafe void GetOAuth2TokenCallbackImpl(GetOAuth2TokenHandler ptr, Result result, OAuth2Token* oauth2Token)
-    {
-        ptr.Invoke(result, oauth2Token);
-    }
-
     public unsafe void GetOAuth2Token(GetOAuth2TokenHandler callback)
     {
-        MethodsPtr->GetOAuth2Token.Invoke(MethodsPtr, callback, GetOAuth2TokenCallback.Create(&GetOAuth2TokenCallbackImpl));
-    }
+        [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvStdcall) })]
+        static unsafe void GetOAuth2TokenCallbackImpl(GetOAuth2TokenHandler ptr, Result result, OAuth2Token* oauth2Token)
+        {
+            ptr.Invoke(result, oauth2Token);
+        }
 
-    [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvStdcall) })]
-    private static unsafe void GetTicketCallbackImpl(GetTicketHandler ptr, Result result, byte* data)
-    {
-        ptr.Invoke(result, data);
+        MethodsPtr->GetOAuth2Token.Invoke(MethodsPtr, callback, GetOAuth2TokenCallback.Create(&GetOAuth2TokenCallbackImpl));
     }
 
     public unsafe void GetTicket(GetTicketHandler callback)
     {
+        [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvStdcall) })]
+        static unsafe void GetTicketCallbackImpl(GetTicketHandler ptr, Result result, byte* data)
+        {
+            ptr.Invoke(result, data);
+        }
+
         MethodsPtr->GetTicket.Invoke(MethodsPtr, callback, GetTicketCallback.Create(&GetTicketCallbackImpl));
     }
 }

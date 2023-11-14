@@ -1,4 +1,5 @@
 ﻿using Snap.Discord.GameSDK.ABI;
+using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -7,28 +8,32 @@ namespace Snap.Discord.GameSDK;
 
 public class NetworkManager
 {
-    public delegate void MessageHandler(ulong peerId, byte channelId, byte[] data);
-
-    public delegate void RouteUpdateHandler(string routeData);
-
     private unsafe readonly NetworkMethods* MethodsPtr;
 
-    public event MessageHandler? OnMessage;
-
-    public event RouteUpdateHandler? OnRouteUpdate;
-
-    internal unsafe NetworkManager(NetworkMethods* ptr, nint eventsPtr, ref NetworkEvents events)
+    internal unsafe NetworkManager(NetworkMethods* ptr, NetworkEvents* eventsPtr, ref NetworkEvents events)
     {
         ResultException.ThrowIfNull(ptr);
         InitEvents(eventsPtr, ref events);
         MethodsPtr = ptr;
     }
 
-    private unsafe void InitEvents(nint eventsPtr, ref NetworkEvents events)
+    private static unsafe void InitEvents(NetworkEvents* eventsPtr, ref NetworkEvents events)
     {
-        events.OnMessage = &OnMessageImpl;
-        events.OnRouteUpdate = &OnRouteUpdateImpl;
-        *(NetworkEvents*)eventsPtr = events;
+        [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvStdcall) })]
+        static unsafe void OnMessageImpl(nint ptr, ulong peerId, byte channelId, nint dataPtr, int dataLen)
+        {
+            DiscordGCHandle.Get(ptr).NetworkManagerInstance?.OnMessage(peerId, channelId, new((void*)dataPtr, dataLen));
+        }
+
+        [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvStdcall) })]
+        static unsafe void OnRouteUpdateImpl(nint ptr, byte* routeData)
+        {
+            DiscordGCHandle.Get(ptr).NetworkManagerInstance?.OnRouteUpdate(MemoryMarshal.CreateReadOnlySpanFromNullTerminated(routeData));
+        }
+
+        events.OnMessage = MessageHandler.Create(&OnMessageImpl);
+        events.OnRouteUpdate = RouteUpdateHandler.Create(&OnRouteUpdateImpl);
+        *eventsPtr = events;
     }
 
     /// <summary>
@@ -37,7 +42,7 @@ public class NetworkManager
     public unsafe ulong GetPeerId()
     {
         ulong ret = default;
-        MethodsPtr->GetPeerId(MethodsPtr, &ret);
+        MethodsPtr->GetPeerId.Invoke(MethodsPtr, &ret);
         return ret;
     }
 
@@ -46,7 +51,7 @@ public class NetworkManager
     /// </summary>
     public unsafe void Flush()
     {
-        MethodsPtr->Flush(MethodsPtr).ThrowOnFailure();
+        MethodsPtr->Flush.Invoke(MethodsPtr).ThrowOnFailure();
     }
 
     /// <summary>
@@ -57,7 +62,7 @@ public class NetworkManager
         byte[] routeDataBytes = Encoding.UTF8.GetBytes(routeData);
         fixed (byte* pRouteData = routeDataBytes)
         {
-            MethodsPtr->OpenPeer(MethodsPtr, peerId, pRouteData).ThrowOnFailure();
+            MethodsPtr->OpenPeer.Invoke(MethodsPtr, peerId, pRouteData).ThrowOnFailure();
         }
     }
 
@@ -69,7 +74,7 @@ public class NetworkManager
         byte[] routeDataBytes = Encoding.UTF8.GetBytes(routeData);
         fixed (byte* pRouteData = routeDataBytes)
         {
-            MethodsPtr->UpdatePeer(MethodsPtr, peerId, pRouteData).ThrowOnFailure();
+            MethodsPtr->UpdatePeer.Invoke(MethodsPtr, peerId, pRouteData).ThrowOnFailure();
         }
     }
 
@@ -78,7 +83,7 @@ public class NetworkManager
     /// </summary>
     public unsafe void ClosePeer(ulong peerId)
     {
-        MethodsPtr->ClosePeer(MethodsPtr, peerId).ThrowOnFailure();
+        MethodsPtr->ClosePeer.Invoke(MethodsPtr, peerId).ThrowOnFailure();
     }
 
     /// <summary>
@@ -86,7 +91,7 @@ public class NetworkManager
     /// </summary>
     public unsafe void OpenChannel(ulong peerId, byte channelId, bool reliable)
     {
-        MethodsPtr->OpenChannel(MethodsPtr, peerId, channelId, reliable).ThrowOnFailure();
+        MethodsPtr->OpenChannel.Invoke(MethodsPtr, peerId, channelId, reliable).ThrowOnFailure();
     }
 
     /// <summary>
@@ -94,7 +99,7 @@ public class NetworkManager
     /// </summary>
     public unsafe void CloseChannel(ulong peerId, byte channelId)
     {
-        MethodsPtr->CloseChannel(MethodsPtr, peerId, channelId).ThrowOnFailure();
+        MethodsPtr->CloseChannel.Invoke(MethodsPtr, peerId, channelId).ThrowOnFailure();
     }
 
     /// <summary>
@@ -104,31 +109,15 @@ public class NetworkManager
     {
         fixed (byte* pData = data)
         {
-            MethodsPtr->SendMessage(MethodsPtr, peerId, channelId, pData, data.Length).ThrowOnFailure();
+            MethodsPtr->SendMessage.Invoke(MethodsPtr, peerId, channelId, pData, data.Length).ThrowOnFailure();
         }
     }
 
-    [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvStdcall) })]
-    private static void OnMessageImpl(nint ptr, ulong peerId, byte channelId, nint dataPtr, int dataLen)
+    protected virtual void OnMessage(ulong peerId, byte channelId, ReadOnlySpan<byte> data)
     {
-        GCHandle h = GCHandle.Fromnint(ptr);
-        Discord d = (Discord)h.Target;
-        if (d.NetworkManagerInstance.OnMessage != null)
-        {
-            byte[] data = new byte[dataLen];
-            Marshal.Copy(dataPtr, data, 0, dataLen);
-            d.NetworkManagerInstance.OnMessage.Invoke(peerId, channelId, data);
-        }
     }
 
-    [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvStdcall) })]
-    private static void OnRouteUpdateImpl(nint ptr, byte* routeData)
+    protected virtual void OnRouteUpdate(ReadOnlySpan<byte> routeData)
     {
-        GCHandle h = GCHandle.Fromnint(ptr);
-        Discord d = (Discord)h.Target;
-        if (d.NetworkManagerInstance.OnRouteUpdate != null)
-        {
-            d.NetworkManagerInstance.OnRouteUpdate.Invoke(routeData);
-        }
     }
 }

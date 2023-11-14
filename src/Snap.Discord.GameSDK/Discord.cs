@@ -1,15 +1,14 @@
 ﻿using Snap.Discord.GameSDK.ABI;
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace Snap.Discord.GameSDK;
 
-public class Discord : IDisposable
+public sealed class Discord : IDisposable
 {
-    [DllImport(Constants.DllName, ExactSpelling = true, CallingConvention = CallingConvention.Winapi)]
+    [DllImport("discord_game_sdk", ExactSpelling = true, CallingConvention = CallingConvention.Winapi)]
     private static extern unsafe Result DiscordCreate(uint version, DiscordCreateParams* createParams, /* out */ DiscordMethods* manager);
-
-    public delegate void SetLogHookHandler(LogLevel level, string message);
 
     private nint SelfHandle;
 
@@ -21,77 +20,75 @@ public class Discord : IDisposable
 
     private ApplicationEvents ApplicationEvents;
 
-    internal ApplicationManager ApplicationManagerInstance;
+    internal ApplicationManager? ApplicationManagerInstance;
 
-    private nint UserEventsPtr;
+    private unsafe UserEvents* UserEventsPtr;
 
-    private UserManager.FFIEvents UserEvents;
+    private UserEvents UserEvents;
 
-    internal UserManager UserManagerInstance;
+    internal UserManager? UserManagerInstance;
 
-    private nint ImageEventsPtr;
+    private unsafe ImageEvents* ImageEventsPtr;
 
-    private ImageManager.FFIEvents ImageEvents;
+    private ImageEvents ImageEvents;
 
-    internal ImageManager ImageManagerInstance;
+    internal ImageManager? ImageManagerInstance;
 
-    private nint ActivityEventsPtr;
+    private unsafe ActivityEvents* ActivityEventsPtr;
 
-    private ActivityManager.FFIEvents ActivityEvents;
+    private ActivityEvents ActivityEvents;
 
-    internal ActivityManager ActivityManagerInstance;
+    internal ActivityManager? ActivityManagerInstance;
 
-    private nint RelationshipEventsPtr;
+    private unsafe RelationshipEvents* RelationshipEventsPtr;
 
-    private RelationshipManager.FFIEvents RelationshipEvents;
+    private RelationshipEvents RelationshipEvents;
 
-    internal RelationshipManager RelationshipManagerInstance;
+    internal RelationshipManager? RelationshipManagerInstance;
 
-    private nint LobbyEventsPtr;
+    private unsafe LobbyEvents* LobbyEventsPtr;
 
-    private LobbyManager.FFIEvents LobbyEvents;
+    private LobbyEvents LobbyEvents;
 
-    internal LobbyManager LobbyManagerInstance;
+    internal LobbyManager? LobbyManagerInstance;
 
-    private nint NetworkEventsPtr;
+    private unsafe NetworkEvents* NetworkEventsPtr;
 
-    private NetworkManager.FFIEvents NetworkEvents;
+    private NetworkEvents NetworkEvents;
 
-    internal NetworkManager NetworkManagerInstance;
+    internal NetworkManager? NetworkManagerInstance;
 
-    private nint OverlayEventsPtr;
+    private unsafe OverlayEvents* OverlayEventsPtr;
 
-    private OverlayManager.FFIEvents OverlayEvents;
+    private OverlayEvents OverlayEvents;
 
-    internal OverlayManager OverlayManagerInstance;
+    internal OverlayManager? OverlayManagerInstance;
 
-    private nint StorageEventsPtr;
+    private unsafe StorageEvents* StorageEventsPtr;
 
-    private StorageManager.FFIEvents StorageEvents;
+    private StorageEvents StorageEvents;
 
-    internal StorageManager StorageManagerInstance;
+    internal StorageManager? StorageManagerInstance;
 
-    private nint StoreEventsPtr;
+    private unsafe StoreEvents* StoreEventsPtr;
 
-    private StoreManager.FFIEvents StoreEvents;
+    private StoreEvents StoreEvents;
 
-    internal StoreManager StoreManagerInstance;
+    internal StoreManager? StoreManagerInstance;
 
-    private nint VoiceEventsPtr;
+    private unsafe VoiceEvents* VoiceEventsPtr;
 
-    private VoiceManager.FFIEvents VoiceEvents;
+    private VoiceEvents VoiceEvents;
 
-    internal VoiceManager VoiceManagerInstance;
+    internal VoiceManager? VoiceManagerInstance;
 
-    private nint AchievementEventsPtr;
+    private unsafe AchievementEvents* AchievementEventsPtr;
 
-    private AchievementManager.FFIEvents AchievementEvents;
+    private AchievementEvents AchievementEvents;
 
-    internal AchievementManager AchievementManagerInstance;
+    internal AchievementManager? AchievementManagerInstance;
 
-    private unsafe DiscordMethods* MethodsPtr;
-
-    private GCHandle? setLogHook;
+    private unsafe readonly DiscordMethods* MethodsPtr;
 
     public unsafe Discord(long clientId, CreateFlags flags)
     {
@@ -110,270 +107,176 @@ public class Discord : IDisposable
         ApplicationEventsPtr = UnsafeNativeMemory.Alloc<ApplicationEvents>();
         createParams.ApplicationEvents = ApplicationEventsPtr;
         createParams.ApplicationVersion = 1;
-        UserEvents = new UserManager.FFIEvents();
-        UserEventsPtr = Marshal.AllocHGlobal(Marshal.SizeOf(UserEvents));
+
+        UserEvents = default;
+        UserEventsPtr = UnsafeNativeMemory.Alloc<UserEvents>();
         createParams.UserEvents = UserEventsPtr;
         createParams.UserVersion = 1;
-        ImageEvents = new ImageManager.FFIEvents();
-        ImageEventsPtr = Marshal.AllocHGlobal(Marshal.SizeOf(ImageEvents));
+
+        ImageEvents = default;
+        ImageEventsPtr = UnsafeNativeMemory.Alloc<ImageEvents>();
         createParams.ImageEvents = ImageEventsPtr;
         createParams.ImageVersion = 1;
-        ActivityEvents = new ActivityManager.FFIEvents();
-        ActivityEventsPtr = Marshal.AllocHGlobal(Marshal.SizeOf(ActivityEvents));
+
+        ActivityEvents = default;
+        ActivityEventsPtr = UnsafeNativeMemory.Alloc<ActivityEvents>();
         createParams.ActivityEvents = ActivityEventsPtr;
         createParams.ActivityVersion = 1;
-        RelationshipEvents = new RelationshipManager.FFIEvents();
-        RelationshipEventsPtr = Marshal.AllocHGlobal(Marshal.SizeOf(RelationshipEvents));
+
+        RelationshipEvents = default;
+        RelationshipEventsPtr = UnsafeNativeMemory.Alloc<RelationshipEvents>();
         createParams.RelationshipEvents = RelationshipEventsPtr;
         createParams.RelationshipVersion = 1;
-        LobbyEvents = new LobbyManager.FFIEvents();
-        LobbyEventsPtr = Marshal.AllocHGlobal(Marshal.SizeOf(LobbyEvents));
+
+        LobbyEvents = default;
+        LobbyEventsPtr = UnsafeNativeMemory.Alloc<LobbyEvents>();
         createParams.LobbyEvents = LobbyEventsPtr;
         createParams.LobbyVersion = 1;
-        NetworkEvents = new NetworkManager.FFIEvents();
-        NetworkEventsPtr = Marshal.AllocHGlobal(Marshal.SizeOf(NetworkEvents));
+
+        NetworkEvents = default;
+        NetworkEventsPtr = UnsafeNativeMemory.Alloc<NetworkEvents>();
         createParams.NetworkEvents = NetworkEventsPtr;
         createParams.NetworkVersion = 1;
-        OverlayEvents = new OverlayManager.FFIEvents();
-        OverlayEventsPtr = Marshal.AllocHGlobal(Marshal.SizeOf(OverlayEvents));
+
+        OverlayEvents = default;
+        OverlayEventsPtr = UnsafeNativeMemory.Alloc<OverlayEvents>();
         createParams.OverlayEvents = OverlayEventsPtr;
         createParams.OverlayVersion = 2;
-        StorageEvents = new StorageManager.FFIEvents();
-        StorageEventsPtr = Marshal.AllocHGlobal(Marshal.SizeOf(StorageEvents));
+
+        StorageEvents = default;
+        StorageEventsPtr = UnsafeNativeMemory.Alloc<StorageEvents>();
         createParams.StorageEvents = StorageEventsPtr;
         createParams.StorageVersion = 1;
-        StoreEvents = new StoreManager.FFIEvents();
-        StoreEventsPtr = Marshal.AllocHGlobal(Marshal.SizeOf(StoreEvents));
+
+        StoreEvents = default;
+        StoreEventsPtr = UnsafeNativeMemory.Alloc<StoreEvents>();
         createParams.StoreEvents = StoreEventsPtr;
         createParams.StoreVersion = 1;
-        VoiceEvents = new VoiceManager.FFIEvents();
-        VoiceEventsPtr = Marshal.AllocHGlobal(Marshal.SizeOf(VoiceEvents));
+
+        VoiceEvents = default;
+        VoiceEventsPtr = UnsafeNativeMemory.Alloc<VoiceEvents>();
         createParams.VoiceEvents = VoiceEventsPtr;
         createParams.VoiceVersion = 1;
-        AchievementEvents = new AchievementManager.FFIEvents();
-        AchievementEventsPtr = Marshal.AllocHGlobal(Marshal.SizeOf(AchievementEvents));
+
+        AchievementEvents = default;
+        AchievementEventsPtr = UnsafeNativeMemory.Alloc<AchievementEvents>();
         createParams.AchievementEvents = AchievementEventsPtr;
         createParams.AchievementVersion = 1;
+
         InitEvents(EventsPtr, ref Events);
-        Result result = DiscordCreate(3, &createParams, out MethodsPtr);
-        if (result is not Result.Ok)
+        try
+        {
+            DiscordCreate(3, &createParams, MethodsPtr).ThrowOnFailure();
+        }
+        catch
         {
             Dispose();
-            throw new ResultException(result);
+            throw;
         }
     }
 
-    private void InitEvents(nint eventsPtr, ref DiscordEvents events)
+    private static unsafe void InitEvents(DiscordEvents* eventsPtr, ref DiscordEvents events)
     {
-        Marshal.StructureToPtr(events, eventsPtr, false);
+        *eventsPtr = events;
     }
 
-    public void Dispose()
+    public unsafe void Dispose()
     {
-        if (MethodsPtr != nint.Zero)
+        if (MethodsPtr is not null)
         {
-            Methods.Destroy(MethodsPtr);
+            MethodsPtr->Destroy.Invoke(MethodsPtr);
         }
-        SelfHandle.Free();
-        Marshal.FreeHGlobal(EventsPtr);
-        Marshal.FreeHGlobal(ApplicationEventsPtr);
-        Marshal.FreeHGlobal(UserEventsPtr);
-        Marshal.FreeHGlobal(ImageEventsPtr);
-        Marshal.FreeHGlobal(ActivityEventsPtr);
-        Marshal.FreeHGlobal(RelationshipEventsPtr);
-        Marshal.FreeHGlobal(LobbyEventsPtr);
-        Marshal.FreeHGlobal(NetworkEventsPtr);
-        Marshal.FreeHGlobal(OverlayEventsPtr);
-        Marshal.FreeHGlobal(StorageEventsPtr);
-        Marshal.FreeHGlobal(StoreEventsPtr);
-        Marshal.FreeHGlobal(VoiceEventsPtr);
-        Marshal.FreeHGlobal(AchievementEventsPtr);
-        if (setLogHook.HasValue)
-        {
-            setLogHook.Value.Free();
-        }
+
+        DiscordGCHandle.Free(SelfHandle);
+        NativeMemory.Free(EventsPtr);
+        NativeMemory.Free(EventsPtr);
+        NativeMemory.Free(ApplicationEventsPtr);
+        NativeMemory.Free(UserEventsPtr);
+        NativeMemory.Free(ImageEventsPtr);
+        NativeMemory.Free(ActivityEventsPtr);
+        NativeMemory.Free(RelationshipEventsPtr);
+        NativeMemory.Free(LobbyEventsPtr);
+        NativeMemory.Free(NetworkEventsPtr);
+        NativeMemory.Free(OverlayEventsPtr);
+        NativeMemory.Free(StorageEventsPtr);
+        NativeMemory.Free(StoreEventsPtr);
+        NativeMemory.Free(VoiceEventsPtr);
+        NativeMemory.Free(AchievementEventsPtr);
     }
 
-    public void RunCallbacks()
+    public unsafe void RunCallbacks()
     {
-        var res = Methods.RunCallbacks(MethodsPtr);
-        if (res != Result.Ok)
-        {
-            throw new ResultException(res);
-        }
+        MethodsPtr->RunCallbacks.Invoke(MethodsPtr).ThrowOnFailure();
     }
 
-    [MonoPInvokeCallback]
-    private static void SetLogHookCallbackImpl(nint ptr, LogLevel level, string message)
+    public unsafe void SetLogHook(LogLevel minLevel, SetLogHookHandler callback)
     {
-        GCHandle h = GCHandle.Fromnint(ptr);
-        SetLogHookHandler callback = (SetLogHookHandler)h.Target;
-        callback(level, message);
+        [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvStdcall) })]
+        static unsafe void SetLogHookCallbackImpl(SetLogHookHandler ptr, LogLevel level, byte* message)
+        {
+            ptr.Invoke(level, message);
+        }
+
+        MethodsPtr->SetLogHook.Invoke(MethodsPtr, minLevel, callback, SetLogHookCallback.Create(&SetLogHookCallbackImpl));
     }
 
-    public void SetLogHook(LogLevel minLevel, SetLogHookHandler callback)
+    public unsafe ApplicationManager GetApplicationManager()
     {
-        if (setLogHook.HasValue)
-        {
-            setLogHook.Value.Free();
-        }
-        setLogHook = GCHandle.Alloc(callback);
-        Methods.SetLogHook(MethodsPtr, minLevel, GCHandle.Tonint(setLogHook.Value), SetLogHookCallbackImpl);
+        return ApplicationManagerInstance ??= new ApplicationManager(MethodsPtr->GetApplicationManager.Invoke(MethodsPtr), ApplicationEventsPtr, ref ApplicationEvents);
     }
 
-    public ApplicationManager GetApplicationManager()
+    public unsafe UserManager GetUserManager()
     {
-        if (ApplicationManagerInstance == null)
-        {
-            ApplicationManagerInstance = new ApplicationManager(
-              Methods.GetApplicationManager(MethodsPtr),
-              ApplicationEventsPtr,
-              ref ApplicationEvents
-            );
-        }
-        return ApplicationManagerInstance;
+        return UserManagerInstance ??= new UserManager(MethodsPtr->GetUserManager.Invoke(MethodsPtr), UserEventsPtr, ref UserEvents);
     }
 
-    public UserManager GetUserManager()
+    public unsafe ImageManager GetImageManager()
     {
-        if (UserManagerInstance == null)
-        {
-            UserManagerInstance = new UserManager(
-              Methods.GetUserManager(MethodsPtr),
-              UserEventsPtr,
-              ref UserEvents
-            );
-        }
-        return UserManagerInstance;
+        return ImageManagerInstance ??= new ImageManager(MethodsPtr->GetImageManager.Invoke(MethodsPtr), ImageEventsPtr, ref ImageEvents);
     }
 
-    public ImageManager GetImageManager()
+    public unsafe ActivityManager GetActivityManager()
     {
-        if (ImageManagerInstance == null)
-        {
-            ImageManagerInstance = new ImageManager(
-              Methods.GetImageManager(MethodsPtr),
-              ImageEventsPtr,
-              ref ImageEvents
-            );
-        }
-        return ImageManagerInstance;
+        return ActivityManagerInstance ??= new ActivityManager(MethodsPtr->GetActivityManager.Invoke(MethodsPtr), ActivityEventsPtr, ref ActivityEvents);
     }
 
-    public ActivityManager GetActivityManager()
+    public unsafe RelationshipManager GetRelationshipManager()
     {
-        if (ActivityManagerInstance == null)
-        {
-            ActivityManagerInstance = new ActivityManager(
-              Methods.GetActivityManager(MethodsPtr),
-              ActivityEventsPtr,
-              ref ActivityEvents
-            );
-        }
-        return ActivityManagerInstance;
+        return RelationshipManagerInstance ??= new RelationshipManager(MethodsPtr->GetRelationshipManager.Invoke(MethodsPtr), RelationshipEventsPtr, ref RelationshipEvents);
     }
 
-    public RelationshipManager GetRelationshipManager()
+    public unsafe LobbyManager GetLobbyManager()
     {
-        if (RelationshipManagerInstance == null)
-        {
-            RelationshipManagerInstance = new RelationshipManager(
-              Methods.GetRelationshipManager(MethodsPtr),
-              RelationshipEventsPtr,
-              ref RelationshipEvents
-            );
-        }
-        return RelationshipManagerInstance;
+        return LobbyManagerInstance ??= new LobbyManager(MethodsPtr->GetLobbyManager.Invoke(MethodsPtr), LobbyEventsPtr, ref LobbyEvents);
     }
 
-    public LobbyManager GetLobbyManager()
+    public unsafe NetworkManager GetNetworkManager()
     {
-        if (LobbyManagerInstance == null)
-        {
-            LobbyManagerInstance = new LobbyManager(
-              Methods.GetLobbyManager(MethodsPtr),
-              LobbyEventsPtr,
-              ref LobbyEvents
-            );
-        }
-        return LobbyManagerInstance;
+        return NetworkManagerInstance ??= new NetworkManager(MethodsPtr->GetNetworkManager.Invoke(MethodsPtr), NetworkEventsPtr, ref NetworkEvents);
     }
 
-    public NetworkManager GetNetworkManager()
+    public unsafe OverlayManager GetOverlayManager()
     {
-        if (NetworkManagerInstance == null)
-        {
-            NetworkManagerInstance = new NetworkManager(
-              Methods.GetNetworkManager(MethodsPtr),
-              NetworkEventsPtr,
-              ref NetworkEvents
-            );
-        }
-        return NetworkManagerInstance;
+        return OverlayManagerInstance ??= new OverlayManager(MethodsPtr->GetOverlayManager.Invoke(MethodsPtr), OverlayEventsPtr, ref OverlayEvents);
     }
 
-    public OverlayManager GetOverlayManager()
+    public unsafe StorageManager GetStorageManager()
     {
-        if (OverlayManagerInstance == null)
-        {
-            OverlayManagerInstance = new OverlayManager(
-              Methods.GetOverlayManager(MethodsPtr),
-              OverlayEventsPtr,
-              ref OverlayEvents
-            );
-        }
-        return OverlayManagerInstance;
+        return StorageManagerInstance ??= new StorageManager(MethodsPtr->GetStorageManager.Invoke(MethodsPtr), StorageEventsPtr, ref StorageEvents);
     }
 
-    public StorageManager GetStorageManager()
+    public unsafe StoreManager GetStoreManager()
     {
-        if (StorageManagerInstance == null)
-        {
-            StorageManagerInstance = new StorageManager(
-              Methods.GetStorageManager(MethodsPtr),
-              StorageEventsPtr,
-              ref StorageEvents
-            );
-        }
-        return StorageManagerInstance;
+        return StoreManagerInstance ??= new StoreManager(MethodsPtr->GetStoreManager.Invoke(MethodsPtr), StoreEventsPtr, ref StoreEvents);
     }
 
-    public StoreManager GetStoreManager()
+    public unsafe VoiceManager GetVoiceManager()
     {
-        if (StoreManagerInstance == null)
-        {
-            StoreManagerInstance = new StoreManager(
-              Methods.GetStoreManager(MethodsPtr),
-              StoreEventsPtr,
-              ref StoreEvents
-            );
-        }
-        return StoreManagerInstance;
+        return VoiceManagerInstance ??= new VoiceManager(MethodsPtr->GetVoiceManager.Invoke(MethodsPtr), VoiceEventsPtr, ref VoiceEvents);
     }
 
-    public VoiceManager GetVoiceManager()
+    public unsafe AchievementManager GetAchievementManager()
     {
-        if (VoiceManagerInstance == null)
-        {
-            VoiceManagerInstance = new VoiceManager(
-              Methods.GetVoiceManager(MethodsPtr),
-              VoiceEventsPtr,
-              ref VoiceEvents
-            );
-        }
-        return VoiceManagerInstance;
-    }
-
-    public AchievementManager GetAchievementManager()
-    {
-        if (AchievementManagerInstance == null)
-        {
-            AchievementManagerInstance = new AchievementManager(
-              Methods.GetAchievementManager(MethodsPtr),
-              AchievementEventsPtr,
-              ref AchievementEvents
-            );
-        }
-        return AchievementManagerInstance;
+        return AchievementManagerInstance ??= new AchievementManager(MethodsPtr->GetAchievementManager.Invoke(MethodsPtr), AchievementEventsPtr, ref AchievementEvents);
     }
 }

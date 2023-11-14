@@ -17,8 +17,7 @@ public struct LobbyMemberTransaction
                 byte[] valueBytes = Encoding.UTF8.GetBytes(value);
                 fixed (byte* pValue = valueBytes)
                 {
-                    Result res = MethodsPtr->SetMetadata(MethodsPtr, pKey, pValue);
-                    ResultException.ThrowOnFailure(res);
+                    MethodsPtr->SetMetadata.Invoke(MethodsPtr, pKey, pValue).ThrowOnFailure();
                 }
             }
         }
@@ -31,8 +30,7 @@ public struct LobbyMemberTransaction
             byte[] keyBytes = Encoding.UTF8.GetBytes(key);
             fixed (byte* pKey = keyBytes)
             {
-                Result res = MethodsPtr->DeleteMetadata(MethodsPtr, pKey);
-                ResultException.ThrowOnFailure(res);
+                MethodsPtr->DeleteMetadata.Invoke(MethodsPtr, pKey).ThrowOnFailure();
             }
         }
     }

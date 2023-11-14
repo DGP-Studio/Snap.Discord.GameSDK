@@ -1,12 +1,7 @@
-﻿using System.Runtime.InteropServices;
+﻿namespace Snap.Discord.GameSDK;
 
-namespace Snap.Discord.GameSDK;
-
-[StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
 public struct SkuPrice
 {
-    public UInt32 Amount;
-
-    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
-    public string Currency;
+    public uint Amount;
+    public unsafe fixed byte Currency[16];
 }

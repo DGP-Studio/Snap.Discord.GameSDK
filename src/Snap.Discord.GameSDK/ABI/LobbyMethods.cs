@@ -1,6 +1,6 @@
 ﻿namespace Snap.Discord.GameSDK.ABI;
 
-public struct LobbyMethods
+internal struct LobbyMethods
 {
     internal GetLobbyCreateTransactionMethod GetLobbyCreateTransaction;
     internal GetLobbyUpdateTransactionMethod GetLobbyUpdateTransaction;

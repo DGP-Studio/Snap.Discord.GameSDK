@@ -91,6 +91,7 @@ internal sealed class MethodPointerAsStructGenerator : IIncrementalGenerator
             "[MarshalAs(UnmanagedType.LPStr)] string" => "byte*",
             "[MarshalAs(UnmanagedType.LPStr)] ref string" => "byte*",
             "ref string" => "byte*",
+            "string" => "byte*",
             "StringBuilder" => "byte*",
             "byte[]" => "byte*",
             _ => ReplaceWithFullQualifiedTypeInner(type),
@@ -109,9 +110,11 @@ internal sealed class MethodPointerAsStructGenerator : IIncrementalGenerator
 
             type = type switch
             {
-
+                "IntPtr" => "nint",
                 "Int32" => "int",
+                "UInt32" => "uint",
                 "Int64" => "long",
+                "UInt64" => "ulong",
                 _ => type,
             };
 
@@ -128,6 +131,7 @@ internal sealed class MethodPointerAsStructGenerator : IIncrementalGenerator
     {
         StringBuilder sourceBuilder = new StringBuilder().AppendLine($$"""
             using Snap.Discord.GameSDK;
+            using System;
 
             namespace Snap.Discord.GameSDK.ABI;
             """);
@@ -136,6 +140,8 @@ internal sealed class MethodPointerAsStructGenerator : IIncrementalGenerator
         {
             string delegateParameters = MakeDelegateParameters(info);
 
+            string accessModifier = info.MethodName.EndsWith("Handler") ? "public" : "internal";
+
             sourceBuilder.AppendLine($$"""
 
             /// <summary>
@@ -143,11 +149,11 @@ internal sealed class MethodPointerAsStructGenerator : IIncrementalGenerator
             /// <para/>
             /// {{info.ReturnType}} (*thisPtr)({{delegateParameters.Substring(0, delegateParameters.LastIndexOf(','))}})
             /// </summary>
-            public unsafe struct {{info.MethodName}}
+            {{accessModifier}} unsafe struct {{info.MethodName}}
             {
                 private delegate* unmanaged[Stdcall]<{{delegateParameters}}> thisPtr;
 
-                public {{info.ReturnType}} Invoke({{MakeInvokeMethodParameters(info)}})
+                internal {{info.ReturnType}} Invoke({{MakeInvokeMethodParameters(info)}})
                 {
                     {{(info.ReturnType is "void" ? "" : "return ")}}thisPtr({{MakePointerParameters(info)}});
                 }

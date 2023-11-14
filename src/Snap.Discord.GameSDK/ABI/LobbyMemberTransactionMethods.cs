@@ -1,7 +1,7 @@
 ﻿namespace Snap.Discord.GameSDK.ABI;
 
-public struct LobbyMemberTransactionMethods
+internal struct LobbyMemberTransactionMethods
 {
-    internal SetMetadataMethod SetMetadata;
-    internal DeleteMetadataMethod DeleteMetadata;
+    internal LobbyMemberTransactionMethods_SetMetadataMethod SetMetadata;
+    internal LobbyMemberTransactionMethods_DeleteMetadataMethod DeleteMetadata;
 }

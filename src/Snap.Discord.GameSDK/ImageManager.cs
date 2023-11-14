@@ -9,26 +9,26 @@ public class ImageManager
 {
     private unsafe readonly ImageMethods* MethodsPtr;
 
-    internal unsafe ImageManager(ImageMethods* ptr, nint eventsPtr, ref ImageEvents events)
+    internal unsafe ImageManager(ImageMethods* ptr, ImageEvents* eventsPtr, ref ImageEvents events)
     {
         ResultException.ThrowIfNull(ptr);
         InitEvents(eventsPtr, ref events);
         MethodsPtr = ptr;
     }
 
-    private static unsafe void InitEvents(nint eventsPtr, ref ImageEvents events)
+    private static unsafe void InitEvents(ImageEvents* eventsPtr, ref ImageEvents events)
     {
-        *(ImageEvents*)eventsPtr = events;
-    }
-
-    [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvStdcall) })]
-    private static unsafe void FetchCallbackImpl(FetchHandler ptr, Result result, ImageHandle handleResult)
-    {
-        ptr.Invoke(result, handleResult);
+        *eventsPtr = events;
     }
 
     public unsafe void Fetch(ImageHandle handle, bool refresh, FetchHandler callback)
     {
+        [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvStdcall) })]
+        static unsafe void FetchCallbackImpl(FetchHandler ptr, Result result, ImageHandle handleResult)
+        {
+            ptr.Invoke(result, handleResult);
+        }
+
         MethodsPtr->Fetch.Invoke(MethodsPtr, handle, refresh, callback, FetchCallback.Create(&FetchCallbackImpl));
     }
 

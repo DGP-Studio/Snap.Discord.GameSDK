@@ -12,31 +12,11 @@ public class ResultException : Exception
     {
     }
 
-    [Obsolete]
-    public static void ThrowOnFailure(Result result)
-    {
-        if (result is not Result.Ok)
-        {
-            throw new ResultException(result);
-        }
-    }
-
-    public static unsafe void ThrowIfNull(void* ptr)
+    internal static unsafe void ThrowIfNull(void* ptr)
     {
         if (ptr is null)
         {
             throw new ResultException(Result.InternalError);
-        }
-    }
-}
-
-public static class ResultExtension
-{
-    public static void ThrowOnFailure(this Result result)
-    {
-        if (result is not Result.Ok)
-        {
-            throw new ResultException(result);
         }
     }
 }

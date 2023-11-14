@@ -1,6 +1,6 @@
 ﻿namespace Snap.Discord.GameSDK.ABI;
 
-public struct ImageMethods
+internal struct ImageMethods
 {
     internal FetchMethod Fetch;
     internal GetDimensionsMethod GetDimensions;

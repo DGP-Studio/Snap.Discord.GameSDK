@@ -1,6 +1,6 @@
 ﻿namespace Snap.Discord.GameSDK.ABI;
 
-public struct ApplicationMethods
+internal struct ApplicationMethods
 {
     internal ValidateOrExitMethod ValidateOrExit;
     internal GetCurrentLocaleMethod GetCurrentLocale;

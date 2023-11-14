@@ -11,8 +11,7 @@ public struct LobbyTransaction
     {
         if (MethodsPtr is not null)
         {
-            Result res = MethodsPtr->SetType(MethodsPtr, type);
-            ResultException.ThrowOnFailure(res);
+            MethodsPtr->SetType.Invoke(MethodsPtr, type).ThrowOnFailure();
         }
     }
 
@@ -20,8 +19,7 @@ public struct LobbyTransaction
     {
         if (MethodsPtr is not null)
         {
-            Result res = MethodsPtr->SetOwner(MethodsPtr, ownerId);
-            ResultException.ThrowOnFailure(res);
+            MethodsPtr->SetOwner.Invoke(MethodsPtr, ownerId).ThrowOnFailure();
         }
     }
 
@@ -29,8 +27,7 @@ public struct LobbyTransaction
     {
         if (MethodsPtr is not null)
         {
-            Result res = MethodsPtr->SetCapacity(MethodsPtr, capacity);
-            ResultException.ThrowOnFailure(res);
+            MethodsPtr->SetCapacity.Invoke(MethodsPtr, capacity).ThrowOnFailure();
         }
     }
 
@@ -44,8 +41,7 @@ public struct LobbyTransaction
                 byte[] valueBytes = Encoding.UTF8.GetBytes(value);
                 fixed (byte* pValue = valueBytes)
                 {
-                    Result res = MethodsPtr->SetMetadata(MethodsPtr, pKey, pValue);
-                    ResultException.ThrowOnFailure(res);
+                    MethodsPtr->SetMetadata.Invoke(MethodsPtr, pKey, pValue).ThrowOnFailure();
                 }
             }
         }
@@ -58,8 +54,7 @@ public struct LobbyTransaction
             byte[] keyBytes = Encoding.UTF8.GetBytes(key);
             fixed (byte* pKey = keyBytes)
             {
-                Result res = MethodsPtr->DeleteMetadata(MethodsPtr, pKey);
-                ResultException.ThrowOnFailure(res);
+                MethodsPtr->DeleteMetadata.Invoke(MethodsPtr, pKey).ThrowOnFailure();
             }
         }
     }
@@ -68,8 +63,7 @@ public struct LobbyTransaction
     {
         if (MethodsPtr is not null)
         {
-            Result res = MethodsPtr->SetLocked(MethodsPtr, locked);
-            ResultException.ThrowOnFailure(res);
+            MethodsPtr->SetLocked.Invoke(MethodsPtr, locked).ThrowOnFailure();
         }
     }
 }

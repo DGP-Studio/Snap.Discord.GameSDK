@@ -18,8 +18,7 @@ public struct LobbySearchQuery
                 byte[] valueBytes = Encoding.UTF8.GetBytes(value);
                 fixed(byte* pValue = valueBytes)
                 {
-                    Result res = MethodsPtr->Filter(MethodsPtr, pKey, comparison, cast, pValue);
-                    ResultException.ThrowOnFailure(res);
+                    MethodsPtr->Filter.Invoke(MethodsPtr, pKey, comparison, cast, pValue).ThrowOnFailure();
                 }
             }
         }
@@ -35,8 +34,7 @@ public struct LobbySearchQuery
                 byte[] valueBytes = Encoding.UTF8.GetBytes(value);
                 fixed(byte* pValue = valueBytes)
                 {
-                    Result res = MethodsPtr->Sort(MethodsPtr, pKey, cast, pValue);
-                    ResultException.ThrowOnFailure(res);
+                    MethodsPtr->Sort.Invoke(MethodsPtr, pKey, cast, pValue).ThrowOnFailure();
                 }
             }
         }
@@ -46,8 +44,7 @@ public struct LobbySearchQuery
     {
         if (MethodsPtr is not null)
         {
-            Result res = MethodsPtr->Limit(MethodsPtr, limit);
-            ResultException.ThrowOnFailure(res);
+            MethodsPtr->Limit.Invoke(MethodsPtr, limit).ThrowOnFailure();
         }
     }
 
@@ -55,8 +52,7 @@ public struct LobbySearchQuery
     {
         if (MethodsPtr is not null)
         {
-            Result res = MethodsPtr->Distance(MethodsPtr, distance);
-            ResultException.ThrowOnFailure(res);
+            MethodsPtr->Distance.Invoke(MethodsPtr, distance).ThrowOnFailure();
         }
     }
 }

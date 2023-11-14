@@ -1,6 +1,6 @@
 ﻿namespace Snap.Discord.GameSDK.ABI;
 
-public struct AchievementEvents
+internal struct AchievementEvents
 {
     internal UserAchievementUpdateHandler OnUserAchievementUpdate;
 }

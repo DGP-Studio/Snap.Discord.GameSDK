@@ -1,6 +1,6 @@
 ﻿namespace Snap.Discord.GameSDK.ABI;
 
-public struct LobbyEvents
+internal struct LobbyEvents
 {
     internal LobbyUpdateHandler OnLobbyUpdate;
     internal LobbyDeleteHandler OnLobbyDelete;

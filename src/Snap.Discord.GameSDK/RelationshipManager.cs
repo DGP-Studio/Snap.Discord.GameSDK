@@ -8,14 +8,14 @@ public class RelationshipManager
 {
     private unsafe readonly RelationshipMethods* MethodsPtr;
 
-    internal unsafe RelationshipManager(RelationshipMethods* ptr, RelationshipEvents* eventsPtr, ref RelationshipEvents events)
+    internal unsafe RelationshipManager(RelationshipMethods* ptr, RelationshipEvents* eventsPtr)
     {
         ResultException.ThrowIfNull(ptr);
-        InitEvents(eventsPtr, ref events);
+        InitEvents(eventsPtr);
         MethodsPtr = ptr;
     }
 
-    private static unsafe void InitEvents(RelationshipEvents* eventsPtr, ref RelationshipEvents events)
+    private static unsafe void InitEvents(RelationshipEvents* eventsPtr)
     {
         [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvStdcall) })]
         static void OnRefreshImpl(nint ptr)
@@ -29,9 +29,8 @@ public class RelationshipManager
             DiscordGCHandle.Get(ptr).RelationshipManagerInstance?.OnRelationshipUpdate(ref *relationship);
         }
 
-        events.OnRefresh = RefreshHandler.Create(&OnRefreshImpl);
-        events.OnRelationshipUpdate = RelationshipUpdateHandler.Create(&OnRelationshipUpdateImpl);
-        *eventsPtr = events;
+        eventsPtr->OnRefresh = RefreshHandler.Create(&OnRefreshImpl);
+        eventsPtr->OnRelationshipUpdate = RelationshipUpdateHandler.Create(&OnRelationshipUpdateImpl);
     }
 
     public unsafe void Filter(FilterHandler callback)

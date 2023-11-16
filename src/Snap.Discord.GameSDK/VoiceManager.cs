@@ -8,23 +8,22 @@ public class VoiceManager
 {
     private unsafe readonly VoiceMethods* MethodsPtr;
 
-    internal unsafe VoiceManager(VoiceMethods* ptr, VoiceEvents* eventsPtr, ref VoiceEvents events)
+    internal unsafe VoiceManager(VoiceMethods* ptr, VoiceEvents* eventsPtr)
     {
         ResultException.ThrowIfNull(ptr);
-        InitEvents(eventsPtr, ref events);
+        InitEvents(eventsPtr);
         MethodsPtr = ptr;
     }
 
-    private static unsafe void InitEvents(VoiceEvents* eventsPtr, ref VoiceEvents events)
+    private static unsafe void InitEvents(VoiceEvents* eventsPtr)
     {
         [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvStdcall) })]
         static void OnSettingsUpdateImpl(nint ptr)
         {
-            DiscordGCHandle.Get(ptr).VoiceManagerInstance.OnSettingsUpdate();
+            DiscordGCHandle.Get(ptr).VoiceManagerInstance?.OnSettingsUpdate();
         }
 
-        events.OnSettingsUpdate = SettingsUpdateHandler.Create(&OnSettingsUpdateImpl);
-        *eventsPtr = events;
+        eventsPtr->OnSettingsUpdate = SettingsUpdateHandler.Create(&OnSettingsUpdateImpl);
     }
 
     public unsafe InputMode GetInputMode()

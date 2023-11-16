@@ -10,72 +10,71 @@ public class LobbyManager
 {
     private readonly unsafe LobbyMethods* MethodsPtr;
 
-    internal unsafe LobbyManager(LobbyMethods* ptr, LobbyEvents* eventsPtr, ref LobbyEvents events)
+    internal unsafe LobbyManager(LobbyMethods* ptr, LobbyEvents* eventsPtr)
     {
         ResultException.ThrowIfNull(ptr);
-        InitEvents(eventsPtr, ref events);
+        InitEvents(eventsPtr);
         MethodsPtr = ptr;
     }
 
-    private static unsafe void InitEvents(LobbyEvents* eventsPtr, ref LobbyEvents events)
+    private static unsafe void InitEvents(LobbyEvents* eventsPtr)
     {
         [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvStdcall) })]
         static void OnLobbyUpdateImpl(nint ptr, long lobbyId)
         {
-            DiscordGCHandle.Get(ptr).LobbyManagerInstance.OnLobbyUpdate(lobbyId);
+            DiscordGCHandle.Get(ptr).LobbyManagerInstance?.OnLobbyUpdate(lobbyId);
         }
 
         [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvStdcall) })]
         static void OnLobbyDeleteImpl(nint ptr, long lobbyId, uint reason)
         {
-            DiscordGCHandle.Get(ptr).LobbyManagerInstance.OnLobbyDelete(lobbyId, reason);
+            DiscordGCHandle.Get(ptr).LobbyManagerInstance?.OnLobbyDelete(lobbyId, reason);
         }
 
         [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvStdcall) })]
         static void OnMemberConnectImpl(nint ptr, long lobbyId, long userId)
         {
-            DiscordGCHandle.Get(ptr).LobbyManagerInstance.OnMemberConnect(lobbyId, userId);
+            DiscordGCHandle.Get(ptr).LobbyManagerInstance?.OnMemberConnect(lobbyId, userId);
         }
 
         [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvStdcall) })]
         static void OnMemberUpdateImpl(nint ptr, long lobbyId, long userId)
         {
-            DiscordGCHandle.Get(ptr).LobbyManagerInstance.OnMemberUpdate(lobbyId, userId);
+            DiscordGCHandle.Get(ptr).LobbyManagerInstance?.OnMemberUpdate(lobbyId, userId);
         }
 
         [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvStdcall) })]
         static void OnMemberDisconnectImpl(nint ptr, long lobbyId, long userId)
         {
-            DiscordGCHandle.Get(ptr).LobbyManagerInstance.OnMemberDisconnect(lobbyId, userId);
+            DiscordGCHandle.Get(ptr).LobbyManagerInstance?.OnMemberDisconnect(lobbyId, userId);
         }
 
         [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvStdcall) })]
         static unsafe void OnLobbyMessageImpl(nint ptr, long lobbyId, long userId, nint dataPtr, int dataLen)
         {
-            DiscordGCHandle.Get(ptr).LobbyManagerInstance.OnLobbyMessage(lobbyId, userId, new((void*)dataPtr, dataLen));
+            DiscordGCHandle.Get(ptr).LobbyManagerInstance?.OnLobbyMessage(lobbyId, userId, new((void*)dataPtr, dataLen));
         }
 
         [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvStdcall) })]
         static void OnSpeakingImpl(nint ptr, long lobbyId, long userId, bool speaking)
         {
-            DiscordGCHandle.Get(ptr).LobbyManagerInstance.OnSpeaking(lobbyId, userId, speaking);
+            DiscordGCHandle.Get(ptr).LobbyManagerInstance?.OnSpeaking(lobbyId, userId, speaking);
         }
 
         [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvStdcall) })]
         static unsafe void OnNetworkMessageImpl(nint ptr, long lobbyId, long userId, byte channelId, nint dataPtr, int dataLen)
         {
-            DiscordGCHandle.Get(ptr).LobbyManagerInstance.OnNetworkMessage(lobbyId, userId, channelId, new((void*)dataPtr, dataLen));
+            DiscordGCHandle.Get(ptr).LobbyManagerInstance?.OnNetworkMessage(lobbyId, userId, channelId, new((void*)dataPtr, dataLen));
         }
 
-        events.OnLobbyUpdate = LobbyUpdateHandler.Create(&OnLobbyUpdateImpl);
-        events.OnLobbyDelete = LobbyDeleteHandler.Create(&OnLobbyDeleteImpl);
-        events.OnMemberConnect = MemberConnectHandler.Create(&OnMemberConnectImpl);
-        events.OnMemberUpdate = MemberUpdateHandler.Create(&OnMemberUpdateImpl);
-        events.OnMemberDisconnect = MemberDisconnectHandler.Create(&OnMemberDisconnectImpl);
-        events.OnLobbyMessage = LobbyMessageHandler.Create(&OnLobbyMessageImpl);
-        events.OnSpeaking = SpeakingHandler.Create(&OnSpeakingImpl);
-        events.OnNetworkMessage = NetworkMessageHandler.Create(&OnNetworkMessageImpl);
-        *eventsPtr = events;
+        eventsPtr->OnLobbyUpdate = LobbyUpdateHandler.Create(&OnLobbyUpdateImpl);
+        eventsPtr->OnLobbyDelete = LobbyDeleteHandler.Create(&OnLobbyDeleteImpl);
+        eventsPtr->OnMemberConnect = MemberConnectHandler.Create(&OnMemberConnectImpl);
+        eventsPtr->OnMemberUpdate = MemberUpdateHandler.Create(&OnMemberUpdateImpl);
+        eventsPtr->OnMemberDisconnect = MemberDisconnectHandler.Create(&OnMemberDisconnectImpl);
+        eventsPtr->OnLobbyMessage = LobbyMessageHandler.Create(&OnLobbyMessageImpl);
+        eventsPtr->OnSpeaking = SpeakingHandler.Create(&OnSpeakingImpl);
+        eventsPtr->OnNetworkMessage = NetworkMessageHandler.Create(&OnNetworkMessageImpl);
     }
 
     public unsafe LobbyTransaction GetLobbyCreateTransaction()

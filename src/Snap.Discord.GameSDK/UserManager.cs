@@ -8,23 +8,22 @@ public class UserManager
 {
     private unsafe readonly UserMethods* MethodsPtr;
 
-    internal unsafe UserManager(UserMethods* ptr, UserEvents* eventsPtr, ref UserEvents events)
+    internal unsafe UserManager(UserMethods* ptr, UserEvents* eventsPtr)
     {
         ResultException.ThrowIfNull(ptr);
-        InitEvents(eventsPtr, ref events);
+        InitEvents(eventsPtr);
         MethodsPtr = ptr;
     }
 
-    private static unsafe void InitEvents(UserEvents* eventsPtr, ref UserEvents events)
+    private static unsafe void InitEvents(UserEvents* eventsPtr)
     {
         [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvStdcall) })]
         static void OnCurrentUserUpdateImpl(nint ptr)
         {
-            DiscordGCHandle.Get(ptr).UserManagerInstance.OnCurrentUserUpdate();
+            DiscordGCHandle.Get(ptr).UserManagerInstance?.OnCurrentUserUpdate();
         }
 
-        events.OnCurrentUserUpdate = CurrentUserUpdateHandler.Create(&OnCurrentUserUpdateImpl);
-        *eventsPtr = events;
+        eventsPtr->OnCurrentUserUpdate = CurrentUserUpdateHandler.Create(&OnCurrentUserUpdateImpl);
     }
 
     public unsafe User GetCurrentUser()

@@ -10,14 +10,14 @@ public class ActivityManager
 {
     private unsafe readonly ActivityMethods* MethodsPtr;
 
-    internal unsafe ActivityManager(ActivityMethods* ptr, ActivityEvents* eventsPtr, ref ActivityEvents events)
+    internal unsafe ActivityManager(ActivityMethods* ptr, ActivityEvents* eventsPtr)
     {
         ResultException.ThrowIfNull(ptr);
-        InitEvents(eventsPtr, ref events);
+        InitEvents(eventsPtr);
         MethodsPtr = ptr;
     }
 
-    private static unsafe void InitEvents(ActivityEvents* eventsPtr, ref ActivityEvents events)
+    private static unsafe void InitEvents(ActivityEvents* eventsPtr)
     {
         [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvStdcall) })]
         static unsafe void OnActivityJoinImpl(nint ptr, byte* secret)
@@ -25,7 +25,7 @@ public class ActivityManager
             ReadOnlySpan<byte> bytes = MemoryMarshal.CreateReadOnlySpanFromNullTerminated(secret);
             string secretString = Encoding.UTF8.GetString(bytes);
 
-            DiscordGCHandle.Get(ptr).ActivityManagerInstance.OnActivityJoin(secretString);
+            DiscordGCHandle.Get(ptr).ActivityManagerInstance?.OnActivityJoin(secretString);
         }
 
         [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvStdcall) })]
@@ -34,26 +34,25 @@ public class ActivityManager
             ReadOnlySpan<byte> bytes = MemoryMarshal.CreateReadOnlySpanFromNullTerminated(secret);
             string secretString = Encoding.UTF8.GetString(bytes);
 
-            DiscordGCHandle.Get(ptr).ActivityManagerInstance.OnActivitySpectate(secretString);
+            DiscordGCHandle.Get(ptr).ActivityManagerInstance?.OnActivitySpectate(secretString);
         }
 
         [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvStdcall) })]
         static unsafe void OnActivityJoinRequestImpl(nint ptr, User* user)
         {
-            DiscordGCHandle.Get(ptr).ActivityManagerInstance.OnActivityJoinRequest(ref *user);
+            DiscordGCHandle.Get(ptr).ActivityManagerInstance?.OnActivityJoinRequest(ref *user);
         }
 
         [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvStdcall) })]
         static unsafe void OnActivityInviteImpl(nint ptr, ActivityActionType type, User* user, Activity* activity)
         {
-            DiscordGCHandle.Get(ptr).ActivityManagerInstance.OnActivityInvite(type, ref *user, ref *activity);
+            DiscordGCHandle.Get(ptr).ActivityManagerInstance?.OnActivityInvite(type, ref *user, ref *activity);
         }
 
-        events.OnActivityJoin = ActivityJoinHandler.Create(&OnActivityJoinImpl);
-        events.OnActivitySpectate = ActivitySpectateHandler.Create(&OnActivitySpectateImpl);
-        events.OnActivityJoinRequest = ActivityJoinRequestHandler.Create(&OnActivityJoinRequestImpl);
-        events.OnActivityInvite = ActivityInviteHandler.Create(&OnActivityInviteImpl);
-        *eventsPtr = events;
+        eventsPtr->OnActivityJoin = ActivityJoinHandler.Create(&OnActivityJoinImpl);
+        eventsPtr->OnActivitySpectate = ActivitySpectateHandler.Create(&OnActivitySpectateImpl);
+        eventsPtr->OnActivityJoinRequest = ActivityJoinRequestHandler.Create(&OnActivityJoinRequestImpl);
+        eventsPtr->OnActivityInvite = ActivityInviteHandler.Create(&OnActivityInviteImpl);
     }
 
     public unsafe void RegisterCommand(string command)

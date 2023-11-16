@@ -1,2 +1,4 @@
 # Snap.Discord.GameSDK
-.NET Discord GameSDK Wrapper
+> .NET Discord GameSDK Wrapper
+
+Almost no marshalling!

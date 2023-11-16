@@ -9,14 +9,14 @@ public class OverlayManager
 {
     private unsafe readonly OverlayMethods* MethodsPtr;
 
-    internal unsafe OverlayManager(OverlayMethods* ptr, OverlayEvents* eventsPtr, ref OverlayEvents events)
+    internal unsafe OverlayManager(OverlayMethods* ptr, OverlayEvents* eventsPtr)
     {
         ResultException.ThrowIfNull(ptr);
-        InitEvents(eventsPtr, ref events);
+        InitEvents(eventsPtr);
         MethodsPtr = ptr;
     }
 
-    private static unsafe void InitEvents(OverlayEvents* eventsPtr, ref OverlayEvents events)
+    private static unsafe void InitEvents(OverlayEvents* eventsPtr)
     {
         [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvStdcall) })]
         static void OnToggleImpl(nint ptr, bool locked)
@@ -24,8 +24,7 @@ public class OverlayManager
             DiscordGCHandle.Get(ptr).OverlayManagerInstance?.OnToggle(locked);
         }
 
-        events.OnToggle = ToggleHandler.Create(&OnToggleImpl);
-        *eventsPtr = events;
+        eventsPtr->OnToggle = ToggleHandler.Create(&OnToggleImpl);
     }
 
     public unsafe bool IsEnabled()

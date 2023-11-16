@@ -149,6 +149,7 @@ internal sealed class MethodPointerAsStructGenerator : IIncrementalGenerator
             /// <para/>
             /// {{info.ReturnType}} (*thisPtr)({{delegateParameters.Substring(0, delegateParameters.LastIndexOf(','))}})
             /// </summary>
+            [System.Diagnostics.DebuggerDisplay("Address: {DebugDisplay}")]
             {{accessModifier}} unsafe struct {{info.MethodName}}
             {
                 private delegate* unmanaged[Stdcall]<{{delegateParameters}}> thisPtr;
@@ -164,6 +165,8 @@ internal sealed class MethodPointerAsStructGenerator : IIncrementalGenerator
                     value.thisPtr = ptr;
                     return value;
                 }
+
+                private nint DebugDisplay => (nint)thisPtr;
             }
             """);
         }

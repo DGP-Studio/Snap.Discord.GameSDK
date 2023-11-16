@@ -10,16 +10,15 @@ public class StorageManager
 {
     private unsafe readonly StorageMethods* MethodsPtr;
 
-    internal unsafe StorageManager(StorageMethods* ptr, StorageEvents* eventsPtr, ref StorageEvents events)
+    internal unsafe StorageManager(StorageMethods* ptr, StorageEvents* eventsPtr)
     {
         ResultException.ThrowIfNull(ptr);
-        InitEvents(eventsPtr, ref events);
+        InitEvents(eventsPtr);
         MethodsPtr = ptr;
     }
 
-    private static unsafe void InitEvents(StorageEvents* eventsPtr, ref StorageEvents events)
+    private static unsafe void InitEvents(StorageEvents* eventsPtr)
     {
-        *eventsPtr = events;
     }
 
     public unsafe uint Read(string name, Span<byte> data)

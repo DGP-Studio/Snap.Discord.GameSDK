@@ -9,16 +9,15 @@ public class ApplicationManager
 {
     private unsafe readonly ApplicationMethods* MethodsPtr;
 
-    internal unsafe ApplicationManager(ApplicationMethods* ptr, ApplicationEvents* eventsPtr, ref ApplicationEvents events)
+    internal unsafe ApplicationManager(ApplicationMethods* ptr, ApplicationEvents* eventsPtr)
     {
         ResultException.ThrowIfNull(ptr);
-        InitEvents(eventsPtr, ref events);
+        InitEvents(eventsPtr);
         MethodsPtr = ptr;
     }
 
-    private unsafe static void InitEvents(ApplicationEvents* eventsPtr, ref ApplicationEvents events)
+    private unsafe static void InitEvents(ApplicationEvents* eventsPtr)
     {
-        *eventsPtr = events;
     }
 
     public unsafe void ValidateOrExit(ValidateOrExitHandler callback)

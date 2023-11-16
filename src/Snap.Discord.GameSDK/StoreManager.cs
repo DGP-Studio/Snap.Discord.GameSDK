@@ -8,30 +8,29 @@ public class StoreManager
 {
     private unsafe StoreMethods* MethodsPtr;
 
-    internal unsafe StoreManager(StoreMethods* ptr, StoreEvents* eventsPtr, ref StoreEvents events)
+    internal unsafe StoreManager(StoreMethods* ptr, StoreEvents* eventsPtr)
     {
         ResultException.ThrowIfNull(ptr);
-        InitEvents(eventsPtr, ref events);
+        InitEvents(eventsPtr);
         MethodsPtr = ptr;
     }
 
-    private static unsafe void InitEvents(StoreEvents* eventsPtr, ref StoreEvents events)
+    private static unsafe void InitEvents(StoreEvents* eventsPtr)
     {
         [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvStdcall) })]
         static unsafe void OnEntitlementCreateImpl(nint ptr, Entitlement* entitlement)
         {
-            DiscordGCHandle.Get(ptr).StoreManagerInstance.OnEntitlementCreate(ref *entitlement);
+            DiscordGCHandle.Get(ptr).StoreManagerInstance?.OnEntitlementCreate(ref *entitlement);
         }
 
         [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvStdcall) })]
         static unsafe void OnEntitlementDeleteImpl(nint ptr, Entitlement* entitlement)
         {
-            DiscordGCHandle.Get(ptr).StoreManagerInstance.OnEntitlementDelete(ref *entitlement);
+            DiscordGCHandle.Get(ptr).StoreManagerInstance?.OnEntitlementDelete(ref *entitlement);
         }
 
-        events.OnEntitlementCreate = EntitlementCreateHandler.Create(&OnEntitlementCreateImpl);
-        events.OnEntitlementDelete = EntitlementDeleteHandler.Create(&OnEntitlementDeleteImpl);
-        *eventsPtr = events;
+        eventsPtr->OnEntitlementCreate = EntitlementCreateHandler.Create(&OnEntitlementCreateImpl);
+        eventsPtr->OnEntitlementDelete = EntitlementDeleteHandler.Create(&OnEntitlementDeleteImpl);
     }
 
     public unsafe void FetchSkus(FetchSkusHandler callback)

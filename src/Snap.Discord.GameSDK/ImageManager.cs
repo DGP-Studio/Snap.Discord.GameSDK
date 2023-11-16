@@ -9,16 +9,15 @@ public class ImageManager
 {
     private unsafe readonly ImageMethods* MethodsPtr;
 
-    internal unsafe ImageManager(ImageMethods* ptr, ImageEvents* eventsPtr, ref ImageEvents events)
+    internal unsafe ImageManager(ImageMethods* ptr, ImageEvents* eventsPtr)
     {
         ResultException.ThrowIfNull(ptr);
-        InitEvents(eventsPtr, ref events);
+        InitEvents(eventsPtr);
         MethodsPtr = ptr;
     }
 
-    private static unsafe void InitEvents(ImageEvents* eventsPtr, ref ImageEvents events)
+    private static unsafe void InitEvents(ImageEvents* eventsPtr)
     {
-        *eventsPtr = events;
     }
 
     public unsafe void Fetch(ImageHandle handle, bool refresh, FetchHandler callback)

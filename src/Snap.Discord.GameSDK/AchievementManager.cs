@@ -8,23 +8,22 @@ public class AchievementManager
 {
     private unsafe readonly AchievementMethods* MethodsPtr;
 
-    internal unsafe AchievementManager(AchievementMethods* ptr, AchievementEvents* eventsPtr, ref AchievementEvents events)
+    internal unsafe AchievementManager(AchievementMethods* ptr, AchievementEvents* eventsPtr)
     {
         ResultException.ThrowIfNull(ptr);
-        InitEvents(eventsPtr, ref events);
+        InitEvents(eventsPtr);
         MethodsPtr = ptr;
     }
 
-    private static unsafe void InitEvents(AchievementEvents* eventsPtr, ref AchievementEvents events)
+    private static unsafe void InitEvents(AchievementEvents* eventsPtr)
     {
         [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvStdcall) })]
         static unsafe void OnUserAchievementUpdateImpl(nint ptr, UserAchievement* userAchievement)
         {
-            DiscordGCHandle.Get(ptr).AchievementManagerInstance.OnUserAchievementUpdate(ref *userAchievement);
+            DiscordGCHandle.Get(ptr).AchievementManagerInstance?.OnUserAchievementUpdate(ref *userAchievement);
         }
 
-        events.OnUserAchievementUpdate = UserAchievementUpdateHandler.Create(&OnUserAchievementUpdateImpl);
-        *eventsPtr = events;
+        eventsPtr->OnUserAchievementUpdate = UserAchievementUpdateHandler.Create(&OnUserAchievementUpdateImpl);
     }
 
     public unsafe void SetUserAchievement(long achievementId, byte percentComplete, SetUserAchievementHandler callback)

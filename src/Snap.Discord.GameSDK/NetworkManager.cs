@@ -10,14 +10,14 @@ public class NetworkManager
 {
     private unsafe readonly NetworkMethods* MethodsPtr;
 
-    internal unsafe NetworkManager(NetworkMethods* ptr, NetworkEvents* eventsPtr, ref NetworkEvents events)
+    internal unsafe NetworkManager(NetworkMethods* ptr, NetworkEvents* eventsPtr)
     {
         ResultException.ThrowIfNull(ptr);
-        InitEvents(eventsPtr, ref events);
+        InitEvents(eventsPtr);
         MethodsPtr = ptr;
     }
 
-    private static unsafe void InitEvents(NetworkEvents* eventsPtr, ref NetworkEvents events)
+    private static unsafe void InitEvents(NetworkEvents* eventsPtr)
     {
         [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvStdcall) })]
         static unsafe void OnMessageImpl(nint ptr, ulong peerId, byte channelId, nint dataPtr, int dataLen)
@@ -31,9 +31,8 @@ public class NetworkManager
             DiscordGCHandle.Get(ptr).NetworkManagerInstance?.OnRouteUpdate(MemoryMarshal.CreateReadOnlySpanFromNullTerminated(routeData));
         }
 
-        events.OnMessage = MessageHandler.Create(&OnMessageImpl);
-        events.OnRouteUpdate = RouteUpdateHandler.Create(&OnRouteUpdateImpl);
-        *eventsPtr = events;
+        eventsPtr->OnMessage = MessageHandler.Create(&OnMessageImpl);
+        eventsPtr->OnRouteUpdate = RouteUpdateHandler.Create(&OnRouteUpdateImpl);
     }
 
     /// <summary>

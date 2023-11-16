@@ -5,92 +5,28 @@ using System.Runtime.InteropServices;
 
 namespace Snap.Discord.GameSDK;
 
-public class Discord : IDisposable
+public sealed class Discord : IDisposable
 {
     [DllImport("discord_game_sdk", ExactSpelling = true, CallingConvention = CallingConvention.Winapi)]
-    public static extern unsafe Result DiscordCreate(uint version, DiscordCreateParams* createParams, /* out */ DiscordMethods* manager);
+    public static extern unsafe Result DiscordCreate(uint version, DiscordCreateParams* createParams, /* out */ DiscordMethods** manager);
 
-    private nint SelfHandle;
+    private readonly nint SelfHandle;
 
-    private unsafe DiscordEvents* EventsPtr;
-
-    private DiscordEvents Events;
-
-    private unsafe ApplicationEvents* ApplicationEventsPtr;
-
-    private ApplicationEvents ApplicationEvents;
+    private unsafe readonly DiscordAllEvents* AllEventsPtr;
+    private unsafe readonly DiscordMethods* MethodsPtr;
 
     internal ApplicationManager? ApplicationManagerInstance;
-
-    private unsafe UserEvents* UserEventsPtr;
-
-    private UserEvents UserEvents;
-
     internal UserManager? UserManagerInstance;
-
-    private unsafe ImageEvents* ImageEventsPtr;
-
-    private ImageEvents ImageEvents;
-
     internal ImageManager? ImageManagerInstance;
-
-    private unsafe ActivityEvents* ActivityEventsPtr;
-
-    private ActivityEvents ActivityEvents;
-
     internal ActivityManager? ActivityManagerInstance;
-
-    private unsafe RelationshipEvents* RelationshipEventsPtr;
-
-    private RelationshipEvents RelationshipEvents;
-
     internal RelationshipManager? RelationshipManagerInstance;
-
-    private unsafe LobbyEvents* LobbyEventsPtr;
-
-    private LobbyEvents LobbyEvents;
-
     internal LobbyManager? LobbyManagerInstance;
-
-    private unsafe NetworkEvents* NetworkEventsPtr;
-
-    private NetworkEvents NetworkEvents;
-
     internal NetworkManager? NetworkManagerInstance;
-
-    private unsafe OverlayEvents* OverlayEventsPtr;
-
-    private OverlayEvents OverlayEvents;
-
     internal OverlayManager? OverlayManagerInstance;
-
-    private unsafe StorageEvents* StorageEventsPtr;
-
-    private StorageEvents StorageEvents;
-
     internal StorageManager? StorageManagerInstance;
-
-    private unsafe StoreEvents* StoreEventsPtr;
-
-    private StoreEvents StoreEvents;
-
     internal StoreManager? StoreManagerInstance;
-
-    private unsafe VoiceEvents* VoiceEventsPtr;
-
-    private VoiceEvents VoiceEvents;
-
     internal VoiceManager? VoiceManagerInstance;
-
-    private unsafe AchievementEvents* AchievementEventsPtr;
-
-    private AchievementEvents AchievementEvents;
-
     internal AchievementManager? AchievementManagerInstance;
-
-    private unsafe DiscordMethods* MethodsPtr;
-
-    private nint padding;
 
     /// <summary>
     /// Creates an instance of Discord to initialize the SDK. This is the overlord of all things Discord. We like to call her Nelly.
@@ -103,91 +39,61 @@ public class Discord : IDisposable
         createParams.ClientId = clientId;
         createParams.Flags = flags;
 
-        Events = default;
-        EventsPtr = UnsafeNativeMemory.Alloc<DiscordEvents>();
-        createParams.Events = EventsPtr;
+        AllEventsPtr = UnsafeNativeMemory.Alloc<DiscordAllEvents>();
+        createParams.Events = &AllEventsPtr->DiscordEvents;
 
         SelfHandle = DiscordGCHandle.Alloc(this);
         createParams.EventData = SelfHandle;
 
-        ApplicationEvents = default;
-        ApplicationEventsPtr = UnsafeNativeMemory.Alloc<ApplicationEvents>();
-        createParams.ApplicationEvents = ApplicationEventsPtr;
+        createParams.ApplicationEvents = &AllEventsPtr->ApplicationEvents;
         createParams.ApplicationVersion = 1;
 
-        UserEvents = default;
-        UserEventsPtr = UnsafeNativeMemory.Alloc<UserEvents>();
-        createParams.UserEvents = UserEventsPtr;
+        createParams.UserEvents = &AllEventsPtr->UserEvents;
         createParams.UserVersion = 1;
 
-        ImageEvents = default;
-        ImageEventsPtr = UnsafeNativeMemory.Alloc<ImageEvents>();
-        createParams.ImageEvents = ImageEventsPtr;
+        createParams.ImageEvents = &AllEventsPtr->ImageEvents;
         createParams.ImageVersion = 1;
 
-        ActivityEvents = default;
-        ActivityEventsPtr = UnsafeNativeMemory.Alloc<ActivityEvents>();
-        createParams.ActivityEvents = ActivityEventsPtr;
+        createParams.ActivityEvents = &AllEventsPtr->ActivityEvents;
         createParams.ActivityVersion = 1;
 
-        RelationshipEvents = default;
-        RelationshipEventsPtr = UnsafeNativeMemory.Alloc<RelationshipEvents>();
-        createParams.RelationshipEvents = RelationshipEventsPtr;
+        createParams.RelationshipEvents = &AllEventsPtr->RelationshipEvents;
         createParams.RelationshipVersion = 1;
 
-        LobbyEvents = default;
-        LobbyEventsPtr = UnsafeNativeMemory.Alloc<LobbyEvents>();
-        createParams.LobbyEvents = LobbyEventsPtr;
+        createParams.LobbyEvents = &AllEventsPtr->LobbyEvents;
         createParams.LobbyVersion = 1;
 
-        NetworkEvents = default;
-        NetworkEventsPtr = UnsafeNativeMemory.Alloc<NetworkEvents>();
-        createParams.NetworkEvents = NetworkEventsPtr;
+        createParams.NetworkEvents = &AllEventsPtr->NetworkEvents;
         createParams.NetworkVersion = 1;
 
-        OverlayEvents = default;
-        OverlayEventsPtr = UnsafeNativeMemory.Alloc<OverlayEvents>();
-        createParams.OverlayEvents = OverlayEventsPtr;
+        createParams.OverlayEvents = &AllEventsPtr->OverlayEvents;
         createParams.OverlayVersion = 2;
 
-        StorageEvents = default;
-        StorageEventsPtr = UnsafeNativeMemory.Alloc<StorageEvents>();
-        createParams.StorageEvents = StorageEventsPtr;
+        createParams.StorageEvents = &AllEventsPtr->StorageEvents;
         createParams.StorageVersion = 1;
 
-        StoreEvents = default;
-        StoreEventsPtr = UnsafeNativeMemory.Alloc<StoreEvents>();
-        createParams.StoreEvents = StoreEventsPtr;
+        createParams.StoreEvents = &AllEventsPtr->StoreEvents;
         createParams.StoreVersion = 1;
 
-        VoiceEvents = default;
-        VoiceEventsPtr = UnsafeNativeMemory.Alloc<VoiceEvents>();
-        createParams.VoiceEvents = VoiceEventsPtr;
+        createParams.VoiceEvents = &AllEventsPtr->VoiceEvents;
         createParams.VoiceVersion = 1;
 
-        AchievementEvents = default;
-        AchievementEventsPtr = UnsafeNativeMemory.Alloc<AchievementEvents>();
-        createParams.AchievementEvents = AchievementEventsPtr;
+        createParams.AchievementEvents = &AllEventsPtr->AchievementEvents;
         createParams.AchievementVersion = 1;
 
-        InitEvents(EventsPtr, ref Events);
-        DiscordMethods* methodsPtr = default;
         try
         {
-            DiscordCreate(3, &createParams, methodsPtr).ThrowOnFailure();
-            //DiscordCreate(3, &createParams, methodsPtr).ThrowOnFailure();
-            MethodsPtr = methodsPtr;
+            MethodsPtr = UnsafeNativeMemory.Alloc<DiscordMethods>();
+            fixed (DiscordMethods** ppv = &MethodsPtr)
+            {
+                DiscordCreate(3, &createParams, ppv).ThrowOnFailure();
+            }
         }
         catch
         {
             Dispose();
             throw;
         }
-    }
-
-    private static unsafe void InitEvents(DiscordEvents* eventsPtr, ref DiscordEvents events)
-    {
-        *eventsPtr = events;
     }
 
     /// <summary>
@@ -201,20 +107,8 @@ public class Discord : IDisposable
         }
 
         DiscordGCHandle.Free(SelfHandle);
-        NativeMemory.Free(EventsPtr);
-        NativeMemory.Free(EventsPtr);
-        NativeMemory.Free(ApplicationEventsPtr);
-        NativeMemory.Free(UserEventsPtr);
-        NativeMemory.Free(ImageEventsPtr);
-        NativeMemory.Free(ActivityEventsPtr);
-        NativeMemory.Free(RelationshipEventsPtr);
-        NativeMemory.Free(LobbyEventsPtr);
-        NativeMemory.Free(NetworkEventsPtr);
-        NativeMemory.Free(OverlayEventsPtr);
-        NativeMemory.Free(StorageEventsPtr);
-        NativeMemory.Free(StoreEventsPtr);
-        NativeMemory.Free(VoiceEventsPtr);
-        NativeMemory.Free(AchievementEventsPtr);
+        NativeMemory.Free(AllEventsPtr);
+        NativeMemory.Free(MethodsPtr);
     }
 
     /// <summary>
@@ -246,7 +140,7 @@ public class Discord : IDisposable
     [Obsolete]
     public unsafe ApplicationManager GetApplicationManager()
     {
-        return ApplicationManagerInstance ??= new ApplicationManager(MethodsPtr->GetApplicationManager.Invoke(MethodsPtr), ApplicationEventsPtr, ref ApplicationEvents);
+        return ApplicationManagerInstance ??= new ApplicationManager(MethodsPtr->GetApplicationManager.Invoke(MethodsPtr), &AllEventsPtr->ApplicationEvents);
     }
 
     /// <summary>
@@ -256,13 +150,13 @@ public class Discord : IDisposable
     /// <returns></returns>
     public unsafe UserManager GetUserManager()
     {
-        return UserManagerInstance ??= new UserManager(MethodsPtr->GetUserManager.Invoke(MethodsPtr), UserEventsPtr, ref UserEvents);
+        return UserManagerInstance ??= new UserManager(MethodsPtr->GetUserManager.Invoke(MethodsPtr), &AllEventsPtr->UserEvents);
     }
 
     [Obsolete]
     public unsafe ImageManager GetImageManager()
     {
-        return ImageManagerInstance ??= new ImageManager(MethodsPtr->GetImageManager.Invoke(MethodsPtr), ImageEventsPtr, ref ImageEvents);
+        return ImageManagerInstance ??= new ImageManager(MethodsPtr->GetImageManager.Invoke(MethodsPtr), &AllEventsPtr->ImageEvents);
     }
 
     /// <summary>
@@ -272,7 +166,7 @@ public class Discord : IDisposable
     /// <returns></returns>
     public unsafe ActivityManager GetActivityManager()
     {
-        return ActivityManagerInstance ??= new ActivityManager(MethodsPtr->GetActivityManager.Invoke(MethodsPtr), ActivityEventsPtr, ref ActivityEvents);
+        return ActivityManagerInstance ??= new ActivityManager(MethodsPtr->GetActivityManager.Invoke(MethodsPtr), &AllEventsPtr->ActivityEvents);
     }
 
     /// <summary>
@@ -282,19 +176,19 @@ public class Discord : IDisposable
     /// <returns></returns>
     public unsafe RelationshipManager GetRelationshipManager()
     {
-        return RelationshipManagerInstance ??= new RelationshipManager(MethodsPtr->GetRelationshipManager.Invoke(MethodsPtr), RelationshipEventsPtr, ref RelationshipEvents);
+        return RelationshipManagerInstance ??= new RelationshipManager(MethodsPtr->GetRelationshipManager.Invoke(MethodsPtr), &AllEventsPtr->RelationshipEvents);
     }
 
     [Obsolete]
     public unsafe LobbyManager GetLobbyManager()
     {
-        return LobbyManagerInstance ??= new LobbyManager(MethodsPtr->GetLobbyManager.Invoke(MethodsPtr), LobbyEventsPtr, ref LobbyEvents);
+        return LobbyManagerInstance ??= new LobbyManager(MethodsPtr->GetLobbyManager.Invoke(MethodsPtr), &AllEventsPtr->LobbyEvents);
     }
 
     [Obsolete]
     public unsafe NetworkManager GetNetworkManager()
     {
-        return NetworkManagerInstance ??= new NetworkManager(MethodsPtr->GetNetworkManager.Invoke(MethodsPtr), NetworkEventsPtr, ref NetworkEvents);
+        return NetworkManagerInstance ??= new NetworkManager(MethodsPtr->GetNetworkManager.Invoke(MethodsPtr), &AllEventsPtr->NetworkEvents);
     }
 
     /// <summary>
@@ -304,13 +198,13 @@ public class Discord : IDisposable
     /// <returns></returns>
     public unsafe OverlayManager GetOverlayManager()
     {
-        return OverlayManagerInstance ??= new OverlayManager(MethodsPtr->GetOverlayManager.Invoke(MethodsPtr), OverlayEventsPtr, ref OverlayEvents);
+        return OverlayManagerInstance ??= new OverlayManager(MethodsPtr->GetOverlayManager.Invoke(MethodsPtr), &AllEventsPtr->OverlayEvents);
     }
 
     [Obsolete]
     public unsafe StorageManager GetStorageManager()
     {
-        return StorageManagerInstance ??= new StorageManager(MethodsPtr->GetStorageManager.Invoke(MethodsPtr), StorageEventsPtr, ref StorageEvents);
+        return StorageManagerInstance ??= new StorageManager(MethodsPtr->GetStorageManager.Invoke(MethodsPtr), &AllEventsPtr->StorageEvents);
     }
 
     /// <summary>
@@ -320,18 +214,18 @@ public class Discord : IDisposable
     /// <returns></returns>
     public unsafe StoreManager GetStoreManager()
     {
-        return StoreManagerInstance ??= new StoreManager(MethodsPtr->GetStoreManager.Invoke(MethodsPtr), StoreEventsPtr, ref StoreEvents);
+        return StoreManagerInstance ??= new StoreManager(MethodsPtr->GetStoreManager.Invoke(MethodsPtr), &AllEventsPtr->StoreEvents);
     }
 
     [Obsolete]
     public unsafe VoiceManager GetVoiceManager()
     {
-        return VoiceManagerInstance ??= new VoiceManager(MethodsPtr->GetVoiceManager.Invoke(MethodsPtr), VoiceEventsPtr, ref VoiceEvents);
+        return VoiceManagerInstance ??= new VoiceManager(MethodsPtr->GetVoiceManager.Invoke(MethodsPtr), &AllEventsPtr->VoiceEvents);
     }
 
     [Obsolete]
     public unsafe AchievementManager GetAchievementManager()
     {
-        return AchievementManagerInstance ??= new AchievementManager(MethodsPtr->GetAchievementManager.Invoke(MethodsPtr), AchievementEventsPtr, ref AchievementEvents);
+        return AchievementManagerInstance ??= new AchievementManager(MethodsPtr->GetAchievementManager.Invoke(MethodsPtr), &AllEventsPtr->AchievementEvents);
     }
 }

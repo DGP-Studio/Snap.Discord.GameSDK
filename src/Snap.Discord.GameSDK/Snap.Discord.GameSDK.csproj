@@ -12,7 +12,7 @@
     <PackageProjectUrl>https://github.com/DGP-Studio/Snap.Discord.GameSDK</PackageProjectUrl>
     <RepositoryUrl>https://github.com/DGP-Studio/Snap.Discord.GameSDK</RepositoryUrl>
     <Version>1.0.0</Version>
-    <Copyright>https://github.com/DGP-Studio/Snap.Discord.GameSDK/blob/main/LICENSE</Copyright>
+    <PackageLicenseUrl>https://github.com/DGP-Studio/Snap.Discord.GameSDK/blob/main/LICENSE</PackageLicenseUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 

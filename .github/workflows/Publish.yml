@@ -19,7 +19,7 @@ jobs:
         dotnet-version: '8.x'
 
     - name: Restore dependencies
-      run: dotnet restore
+      run: dotnet restore Snap.Discord.GameSDK.csproj
 
     - name: Build
       run: dotnet build --configuration Release Snap.Discord.GameSDK.csproj

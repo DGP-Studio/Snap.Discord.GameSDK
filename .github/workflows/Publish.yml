@@ -19,13 +19,13 @@ jobs:
         dotnet-version: '8.x'
 
     - name: Restore dependencies
-      run: dotnet restore Snap.Discord.GameSDK.csproj
+      run: dotnet restore src/Snap.Discord.GameSDK/Snap.Discord.GameSDK.csproj
 
     - name: Build
-      run: dotnet build --configuration Release Snap.Discord.GameSDK.csproj
+      run: dotnet build --configuration Release src/Snap.Discord.GameSDK/Snap.Discord.GameSDK.csproj
 
     - name: Pack
-      run: dotnet pack --no-build --configuration Release
+      run: dotnet pack --no-build --configuration Release src/Snap.Discord.GameSDK/Snap.Discord.GameSDK.csproj
 
     - name: Publish to NuGet
       run: dotnet nuget push **/*.nupkg --source https://api.nuget.org/v3/index.json

@@ -1,6 +1,6 @@
 ﻿namespace Snap.Discord.GameSDK.ABI;
 
-internal struct OverlayEvents
+public struct OverlayEvents
 {
     internal ToggleHandler OnToggle;
 }

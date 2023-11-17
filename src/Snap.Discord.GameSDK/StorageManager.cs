@@ -6,6 +6,7 @@ using System.Text;
 
 namespace Snap.Discord.GameSDK;
 
+[Obsolete("Deprecated by Discord")]
 public class StorageManager
 {
     private unsafe readonly StorageMethods* MethodsPtr;
@@ -21,6 +22,7 @@ public class StorageManager
     {
     }
 
+    [Obsolete("Deprecated by Discord")]
     public unsafe uint Read(string name, Span<byte> data)
     {
         uint ret = default;
@@ -36,9 +38,10 @@ public class StorageManager
         return ret;
     }
 
+    [Obsolete("Deprecated by Discord")]
     public unsafe void ReadAsync(string name, ReadAsyncHandler callback)
     {
-        [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvStdcall) })]
+        [UnmanagedCallersOnly(CallConvs = [typeof(CallConvStdcall)])]
         static unsafe void ReadAsyncCallbackImpl(ReadAsyncHandler ptr, Result result, nint dataPtr, int dataLen)
         {
             ptr.Invoke(result, new((void*)dataPtr, dataLen));
@@ -51,9 +54,10 @@ public class StorageManager
         }
     }
 
+    [Obsolete("Deprecated by Discord")]
     public unsafe void ReadAsyncPartial(string name, ulong offset, ulong length, ReadAsyncPartialHandler callback)
     {
-        [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvStdcall) })]
+        [UnmanagedCallersOnly(CallConvs = [typeof(CallConvStdcall)])]
         static unsafe void ReadAsyncPartialCallbackImpl(ReadAsyncPartialHandler ptr, Result result, nint dataPtr, int dataLen)
         {
             ptr.Invoke(result, new((void*)dataPtr, dataLen));
@@ -66,6 +70,7 @@ public class StorageManager
         }
     }
 
+    [Obsolete("Deprecated by Discord")]
     public unsafe void Write(string name, Span<byte> data)
     {
         byte[] nameBytes = Encoding.UTF8.GetBytes(name);
@@ -78,9 +83,10 @@ public class StorageManager
         }
     }
 
+    [Obsolete("Deprecated by Discord")]
     public unsafe void WriteAsync(string name, byte[] data, WriteAsyncHandler callback)
     {
-        [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvStdcall) })]
+        [UnmanagedCallersOnly(CallConvs = [typeof(CallConvStdcall)])]
         static void WriteAsyncCallbackImpl(WriteAsyncHandler ptr, Result result)
         {
             ptr.Invoke(result);
@@ -96,6 +102,7 @@ public class StorageManager
         }
     }
 
+    [Obsolete("Deprecated by Discord")]
     public unsafe void Delete(string name)
     {
         byte[] nameBytes = Encoding.UTF8.GetBytes(name);
@@ -105,6 +112,7 @@ public class StorageManager
         }
     }
 
+    [Obsolete("Deprecated by Discord")]
     public unsafe bool Exists(string name)
     {
         bool ret = default;
@@ -116,6 +124,7 @@ public class StorageManager
         return ret;
     }
 
+    [Obsolete("Deprecated by Discord")]
     public unsafe int Count()
     {
         int ret = default;
@@ -123,6 +132,7 @@ public class StorageManager
         return ret;
     }
 
+    [Obsolete("Deprecated by Discord")]
     public unsafe FileStat Stat(string name)
     {
         FileStat ret = default;
@@ -134,6 +144,7 @@ public class StorageManager
         return ret;
     }
 
+    [Obsolete("Deprecated by Discord")]
     public unsafe FileStat StatAt(int index)
     {
         FileStat ret = default;
@@ -141,6 +152,7 @@ public class StorageManager
         return ret;
     }
 
+    [Obsolete("Deprecated by Discord")]
     public unsafe string GetPath()
     {
         byte[] ret = new byte[4096];

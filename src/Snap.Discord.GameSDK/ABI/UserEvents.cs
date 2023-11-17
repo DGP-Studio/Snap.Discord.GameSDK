@@ -1,6 +1,6 @@
 ﻿namespace Snap.Discord.GameSDK.ABI;
 
-internal struct UserEvents
+public struct UserEvents
 {
     internal CurrentUserUpdateHandler OnCurrentUserUpdate;
 }

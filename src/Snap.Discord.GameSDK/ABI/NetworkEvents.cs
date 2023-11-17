@@ -1,7 +1,10 @@
-﻿namespace Snap.Discord.GameSDK.ABI;
+﻿using System;
 
+namespace Snap.Discord.GameSDK.ABI;
+
+[Obsolete("Deprecated by Discord")]
 internal struct NetworkEvents
 {
-    internal MessageHandler OnMessage;
-    internal RouteUpdateHandler OnRouteUpdate;
+    [Obsolete("Deprecated by Discord")] internal MessageHandler OnMessage;
+    [Obsolete("Deprecated by Discord")] internal RouteUpdateHandler OnRouteUpdate;
 }

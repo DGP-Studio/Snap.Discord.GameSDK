@@ -1,13 +1,16 @@
-﻿namespace Snap.Discord.GameSDK.ABI;
+﻿using System;
 
+namespace Snap.Discord.GameSDK.ABI;
+
+[Obsolete("Deprecated by Discord")]
 internal struct NetworkMethods
 {
-    internal GetPeerIdMethod GetPeerId;
-    internal FlushMethod Flush;
-    internal OpenPeerMethod OpenPeer;
-    internal UpdatePeerMethod UpdatePeer;
-    internal ClosePeerMethod ClosePeer;
-    internal OpenChannelMethod OpenChannel;
-    internal CloseChannelMethod CloseChannel;
-    internal SendMessageMethod SendMessage;
+    [Obsolete("Deprecated by Discord")] internal GetPeerIdMethod GetPeerId;
+    [Obsolete("Deprecated by Discord")] internal FlushMethod Flush;
+    [Obsolete("Deprecated by Discord")] internal OpenPeerMethod OpenPeer;
+    [Obsolete("Deprecated by Discord")] internal UpdatePeerMethod UpdatePeer;
+    [Obsolete("Deprecated by Discord")] internal ClosePeerMethod ClosePeer;
+    [Obsolete("Deprecated by Discord")] internal OpenChannelMethod OpenChannel;
+    [Obsolete("Deprecated by Discord")] internal CloseChannelMethod CloseChannel;
+    [Obsolete("Deprecated by Discord")] internal SendMessageMethod SendMessage;
 }

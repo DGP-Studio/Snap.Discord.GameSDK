@@ -1,10 +1,11 @@
-﻿namespace Snap.Discord.GameSDK;
+﻿using System;
 
+namespace Snap.Discord.GameSDK;
+
+[Obsolete("Deprecated by Discord")]
 public struct FileStat
 {
-    public unsafe fixed byte Filename[260];
-
-    public ulong Size;
-
-    public ulong LastModified;
+    [Obsolete("Deprecated by Discord")] public unsafe fixed byte Filename[260];
+    [Obsolete("Deprecated by Discord")] public ulong Size;
+    [Obsolete("Deprecated by Discord")] public ulong LastModified;
 }

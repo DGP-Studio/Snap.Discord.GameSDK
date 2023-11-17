@@ -8,24 +8,36 @@ namespace Snap.Discord.GameSDK;
 public sealed class Discord : IDisposable
 {
     [DllImport("discord_game_sdk", ExactSpelling = true, CallingConvention = CallingConvention.Winapi)]
-    public static extern unsafe Result DiscordCreate(uint version, DiscordCreateParams* createParams, /* out */ DiscordMethods** manager);
+    private static extern unsafe Result DiscordCreate(uint version, DiscordCreateParams* createParams, /* out */ DiscordMethods** manager);
 
     private readonly nint SelfHandle;
 
     private unsafe readonly DiscordAllEvents* AllEventsPtr;
     private unsafe readonly DiscordMethods* MethodsPtr;
 
+    [Obsolete("Deprecated by Discord")]
     internal ApplicationManager? ApplicationManagerInstance;
     internal UserManager? UserManagerInstance;
+
+    [Obsolete("Deprecated by Discord")]
     internal ImageManager? ImageManagerInstance;
     internal ActivityManager? ActivityManagerInstance;
     internal RelationshipManager? RelationshipManagerInstance;
+
+    [Obsolete("Deprecated by Discord")]
     internal LobbyManager? LobbyManagerInstance;
+
+    [Obsolete("Deprecated by Discord")]
     internal NetworkManager? NetworkManagerInstance;
     internal OverlayManager? OverlayManagerInstance;
+
+    [Obsolete("Deprecated by Discord")]
     internal StorageManager? StorageManagerInstance;
     internal StoreManager? StoreManagerInstance;
+    [Obsolete("Deprecated by Discord")]
     internal VoiceManager? VoiceManagerInstance;
+
+    [Obsolete("Deprecated by Discord")]
     internal AchievementManager? AchievementManagerInstance;
 
     /// <summary>
@@ -35,51 +47,10 @@ public sealed class Discord : IDisposable
     /// <param name="flags">the creation parameters for the SDK</param>
     public unsafe Discord(long clientId, CreateFlags flags)
     {
-        DiscordCreateParams createParams = default;
-        createParams.ClientId = clientId;
-        createParams.Flags = flags;
-
         AllEventsPtr = UnsafeNativeMemory.Alloc<DiscordAllEvents>();
-        createParams.Events = &AllEventsPtr->DiscordEvents;
-
         SelfHandle = DiscordGCHandle.Alloc(this);
-        createParams.EventData = SelfHandle;
 
-        createParams.ApplicationEvents = &AllEventsPtr->ApplicationEvents;
-        createParams.ApplicationVersion = 1;
-
-        createParams.UserEvents = &AllEventsPtr->UserEvents;
-        createParams.UserVersion = 1;
-
-        createParams.ImageEvents = &AllEventsPtr->ImageEvents;
-        createParams.ImageVersion = 1;
-
-        createParams.ActivityEvents = &AllEventsPtr->ActivityEvents;
-        createParams.ActivityVersion = 1;
-
-        createParams.RelationshipEvents = &AllEventsPtr->RelationshipEvents;
-        createParams.RelationshipVersion = 1;
-
-        createParams.LobbyEvents = &AllEventsPtr->LobbyEvents;
-        createParams.LobbyVersion = 1;
-
-        createParams.NetworkEvents = &AllEventsPtr->NetworkEvents;
-        createParams.NetworkVersion = 1;
-
-        createParams.OverlayEvents = &AllEventsPtr->OverlayEvents;
-        createParams.OverlayVersion = 2;
-
-        createParams.StorageEvents = &AllEventsPtr->StorageEvents;
-        createParams.StorageVersion = 1;
-
-        createParams.StoreEvents = &AllEventsPtr->StoreEvents;
-        createParams.StoreVersion = 1;
-
-        createParams.VoiceEvents = &AllEventsPtr->VoiceEvents;
-        createParams.VoiceVersion = 1;
-
-        createParams.AchievementEvents = &AllEventsPtr->AchievementEvents;
-        createParams.AchievementVersion = 1;
+        DiscordCreateParams createParams = DiscordCreateParams.Create(clientId, flags, AllEventsPtr, SelfHandle);
 
         try
         {
@@ -128,7 +99,7 @@ public sealed class Discord : IDisposable
     /// <param name="callback">the callback function to catch the messages</param>
     public unsafe void SetLogHook(LogLevel minLevel, SetLogHookHandler callback)
     {
-        [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvStdcall) })]
+        [UnmanagedCallersOnly(CallConvs = [typeof(CallConvStdcall)])]
         static unsafe void SetLogHookCallbackImpl(SetLogHookHandler ptr, LogLevel level, byte* message)
         {
             ptr.Invoke(level, message);
@@ -137,7 +108,7 @@ public sealed class Discord : IDisposable
         MethodsPtr->SetLogHook.Invoke(MethodsPtr, minLevel, callback, SetLogHookCallback.Create(&SetLogHookCallbackImpl));
     }
 
-    [Obsolete]
+    [Obsolete("Deprecated by Discord")]
     public unsafe ApplicationManager GetApplicationManager()
     {
         return ApplicationManagerInstance ??= new ApplicationManager(MethodsPtr->GetApplicationManager.Invoke(MethodsPtr), &AllEventsPtr->ApplicationEvents);
@@ -153,7 +124,7 @@ public sealed class Discord : IDisposable
         return UserManagerInstance ??= new UserManager(MethodsPtr->GetUserManager.Invoke(MethodsPtr), &AllEventsPtr->UserEvents);
     }
 
-    [Obsolete]
+    [Obsolete("Deprecated by Discord")]
     public unsafe ImageManager GetImageManager()
     {
         return ImageManagerInstance ??= new ImageManager(MethodsPtr->GetImageManager.Invoke(MethodsPtr), &AllEventsPtr->ImageEvents);
@@ -179,13 +150,13 @@ public sealed class Discord : IDisposable
         return RelationshipManagerInstance ??= new RelationshipManager(MethodsPtr->GetRelationshipManager.Invoke(MethodsPtr), &AllEventsPtr->RelationshipEvents);
     }
 
-    [Obsolete]
+    [Obsolete("Deprecated by Discord")]
     public unsafe LobbyManager GetLobbyManager()
     {
         return LobbyManagerInstance ??= new LobbyManager(MethodsPtr->GetLobbyManager.Invoke(MethodsPtr), &AllEventsPtr->LobbyEvents);
     }
 
-    [Obsolete]
+    [Obsolete("Deprecated by Discord")]
     public unsafe NetworkManager GetNetworkManager()
     {
         return NetworkManagerInstance ??= new NetworkManager(MethodsPtr->GetNetworkManager.Invoke(MethodsPtr), &AllEventsPtr->NetworkEvents);
@@ -201,29 +172,25 @@ public sealed class Discord : IDisposable
         return OverlayManagerInstance ??= new OverlayManager(MethodsPtr->GetOverlayManager.Invoke(MethodsPtr), &AllEventsPtr->OverlayEvents);
     }
 
-    [Obsolete]
+    [Obsolete("Deprecated by Discord")]
     public unsafe StorageManager GetStorageManager()
     {
         return StorageManagerInstance ??= new StorageManager(MethodsPtr->GetStorageManager.Invoke(MethodsPtr), &AllEventsPtr->StorageEvents);
     }
 
-    /// <summary>
-    /// Fetches an instance of the manager for interfacing with SKUs and Entitlements in the SDK.
-    /// for all things entitlements and SKUs, including IAP
-    /// </summary>
-    /// <returns></returns>
+    [Obsolete("Deprecated by Discord")]
     public unsafe StoreManager GetStoreManager()
     {
         return StoreManagerInstance ??= new StoreManager(MethodsPtr->GetStoreManager.Invoke(MethodsPtr), &AllEventsPtr->StoreEvents);
     }
 
-    [Obsolete]
+    [Obsolete("Deprecated by Discord")]
     public unsafe VoiceManager GetVoiceManager()
     {
         return VoiceManagerInstance ??= new VoiceManager(MethodsPtr->GetVoiceManager.Invoke(MethodsPtr), &AllEventsPtr->VoiceEvents);
     }
 
-    [Obsolete]
+    [Obsolete("Deprecated by Discord")]
     public unsafe AchievementManager GetAchievementManager()
     {
         return AchievementManagerInstance ??= new AchievementManager(MethodsPtr->GetAchievementManager.Invoke(MethodsPtr), &AllEventsPtr->AchievementEvents);

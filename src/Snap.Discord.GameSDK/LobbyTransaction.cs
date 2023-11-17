@@ -1,12 +1,16 @@
 ﻿using Snap.Discord.GameSDK.ABI;
+using System;
 using System.Text;
 
 namespace Snap.Discord.GameSDK;
 
+[Obsolete("Deprecated by Discord")]
 public struct LobbyTransaction
 {
+    [Obsolete("Deprecated by Discord")]
     internal unsafe LobbyTransactionMethods* MethodsPtr;
 
+    [Obsolete("Deprecated by Discord")]
     public unsafe void SetType(LobbyType type)
     {
         if (MethodsPtr is not null)
@@ -15,6 +19,7 @@ public struct LobbyTransaction
         }
     }
 
+    [Obsolete("Deprecated by Discord")]
     public unsafe void SetOwner(long ownerId)
     {
         if (MethodsPtr is not null)
@@ -23,6 +28,7 @@ public struct LobbyTransaction
         }
     }
 
+    [Obsolete("Deprecated by Discord")]
     public unsafe void SetCapacity(uint capacity)
     {
         if (MethodsPtr is not null)
@@ -31,6 +37,7 @@ public struct LobbyTransaction
         }
     }
 
+    [Obsolete("Deprecated by Discord")]
     public unsafe void SetMetadata(string key, string value)
     {
         if (MethodsPtr is not null)
@@ -47,6 +54,7 @@ public struct LobbyTransaction
         }
     }
 
+    [Obsolete("Deprecated by Discord")]
     public unsafe void DeleteMetadata(string key)
     {
         if (MethodsPtr is not null)
@@ -59,6 +67,7 @@ public struct LobbyTransaction
         }
     }
 
+    [Obsolete("Deprecated by Discord")]
     public unsafe void SetLocked(bool locked)
     {
         if (MethodsPtr is not null)

@@ -1,6 +1,9 @@
-﻿namespace Snap.Discord.GameSDK;
+﻿using System;
 
+namespace Snap.Discord.GameSDK;
+
+[Obsolete("Deprecated by Discord")]
 public enum ImageType
 {
-    User,
+    [Obsolete("Deprecated by Discord")] User,
 }

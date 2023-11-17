@@ -1,8 +1,10 @@
-﻿namespace Snap.Discord.GameSDK;
+﻿using System;
 
+namespace Snap.Discord.GameSDK;
+
+[Obsolete("Deprecated by Discord")]
 public struct InputMode
 {
-    public InputModeType Type;
-
-    public unsafe fixed byte Shortcut[256];
+    [Obsolete("Deprecated by Discord")] public InputModeType Type;
+    [Obsolete("Deprecated by Discord")] public unsafe fixed byte Shortcut[256];
 }

@@ -1,10 +1,12 @@
 ﻿using Snap.Discord.GameSDK.ABI;
+using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 
 namespace Snap.Discord.GameSDK;
 
+[Obsolete("Deprecated by Discord")]
 public class ApplicationManager
 {
     private unsafe readonly ApplicationMethods* MethodsPtr;
@@ -20,9 +22,10 @@ public class ApplicationManager
     {
     }
 
+    [Obsolete("Deprecated by Discord")]
     public unsafe void ValidateOrExit(ValidateOrExitHandler callback)
     {
-        [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvStdcall) })]
+        [UnmanagedCallersOnly(CallConvs = [typeof(CallConvStdcall)])]
         static unsafe void ValidateOrExitCallbackImpl(ValidateOrExitHandler ptr, Result result)
         {
             ptr.Invoke(result);
@@ -31,6 +34,7 @@ public class ApplicationManager
         MethodsPtr->ValidateOrExit.Invoke(MethodsPtr, callback, ValidateOrExitCallback.Create(&ValidateOrExitCallbackImpl));
     }
 
+    [Obsolete("Deprecated by Discord")]
     public unsafe string GetCurrentLocale()
     {
         byte[] ret = new byte[128];
@@ -41,6 +45,7 @@ public class ApplicationManager
         }
     }
 
+    [Obsolete("Deprecated by Discord")]
     public unsafe string GetCurrentBranch()
     {
         byte[] ret = new byte[4096];
@@ -51,9 +56,10 @@ public class ApplicationManager
         }
     }
 
+    [Obsolete("Deprecated by Discord")]
     public unsafe void GetOAuth2Token(GetOAuth2TokenHandler callback)
     {
-        [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvStdcall) })]
+        [UnmanagedCallersOnly(CallConvs = [typeof(CallConvStdcall)])]
         static unsafe void GetOAuth2TokenCallbackImpl(GetOAuth2TokenHandler ptr, Result result, OAuth2Token* oauth2Token)
         {
             ptr.Invoke(result, oauth2Token);
@@ -62,9 +68,10 @@ public class ApplicationManager
         MethodsPtr->GetOAuth2Token.Invoke(MethodsPtr, callback, GetOAuth2TokenCallback.Create(&GetOAuth2TokenCallbackImpl));
     }
 
+    [Obsolete("Deprecated by Discord")]
     public unsafe void GetTicket(GetTicketHandler callback)
     {
-        [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvStdcall) })]
+        [UnmanagedCallersOnly(CallConvs = [typeof(CallConvStdcall)])]
         static unsafe void GetTicketCallbackImpl(GetTicketHandler ptr, Result result, byte* data)
         {
             ptr.Invoke(result, data);

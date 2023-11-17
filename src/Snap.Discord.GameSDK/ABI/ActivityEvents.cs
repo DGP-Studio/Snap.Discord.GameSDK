@@ -1,6 +1,6 @@
 ﻿namespace Snap.Discord.GameSDK.ABI;
 
-internal struct ActivityEvents
+public struct ActivityEvents
 {
     internal ActivityJoinHandler OnActivityJoin;
     internal ActivitySpectateHandler OnActivitySpectate;

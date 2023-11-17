@@ -1,10 +1,13 @@
-﻿namespace Snap.Discord.GameSDK.ABI;
+﻿using System;
 
+namespace Snap.Discord.GameSDK.ABI;
+
+[Obsolete("Deprecated by Discord")]
 internal struct AchievementMethods
 {
-    internal SetUserAchievementMethod SetUserAchievement;
-    internal FetchUserAchievementsMethod FetchUserAchievements;
-    internal CountUserAchievementsMethod CountUserAchievements;
-    internal GetUserAchievementMethod GetUserAchievement;
-    internal GetUserAchievementAtMethod GetUserAchievementAt;
+    [Obsolete("Deprecated by Discord")] internal SetUserAchievementMethod SetUserAchievement;
+    [Obsolete("Deprecated by Discord")] internal FetchUserAchievementsMethod FetchUserAchievements;
+    [Obsolete("Deprecated by Discord")] internal CountUserAchievementsMethod CountUserAchievements;
+    [Obsolete("Deprecated by Discord")] internal GetUserAchievementMethod GetUserAchievement;
+    [Obsolete("Deprecated by Discord")] internal GetUserAchievementAtMethod GetUserAchievementAt;
 }

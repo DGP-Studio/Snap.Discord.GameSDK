@@ -1,6 +1,6 @@
 ﻿namespace Snap.Discord.GameSDK.ABI;
 
-internal struct OverlayMethods
+public struct OverlayMethods
 {
     internal IsEnabledMethod IsEnabled;
     internal IsLockedMethod IsLocked;

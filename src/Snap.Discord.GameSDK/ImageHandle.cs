@@ -1,10 +1,11 @@
-﻿namespace Snap.Discord.GameSDK;
+﻿using System;
 
+namespace Snap.Discord.GameSDK;
+
+[Obsolete("Deprecated by Discord")]
 public struct ImageHandle
 {
-    public ImageType Type;
-
-    public long Id;
-
-    public uint Size;
+    [Obsolete("Deprecated by Discord")] public ImageType Type;
+    [Obsolete("Deprecated by Discord")] public long Id;
+    [Obsolete("Deprecated by Discord")] public uint Size;
 }

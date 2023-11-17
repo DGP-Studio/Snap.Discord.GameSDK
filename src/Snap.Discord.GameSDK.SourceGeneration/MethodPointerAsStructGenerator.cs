@@ -17,7 +17,7 @@ internal sealed class MethodPointerAsStructGenerator : IIncrementalGenerator
     {
         IncrementalValueProvider<ImmutableArray<AdditionalText>> provider = context.AdditionalTextsProvider.Where(MatchFileName).Collect();
 
-        context.RegisterImplementationSourceOutput(provider, GenerateIdentityStructs);
+        context.RegisterImplementationSourceOutput(provider, GenerateStructs);
     }
 
     private static bool MatchFileName(AdditionalText text)
@@ -25,7 +25,7 @@ internal sealed class MethodPointerAsStructGenerator : IIncrementalGenerator
         return Path.GetFileName(text.Path) == FileName;
     }
 
-    private static void GenerateIdentityStructs(SourceProductionContext context, ImmutableArray<AdditionalText> texts)
+    private static void GenerateStructs(SourceProductionContext context, ImmutableArray<AdditionalText> texts)
     {
         AdditionalText jsonFile = texts.Single();
 
@@ -37,7 +37,7 @@ internal sealed class MethodPointerAsStructGenerator : IIncrementalGenerator
 
     private static List<MethodPointerInfo> ParseMethodPointerInfoList(string text)
     {
-        List<MethodPointerInfo> results = new();
+        List<MethodPointerInfo> results = [];
         using (StringReader reader = new(text))
         {
             while(reader.ReadLine() is string line)
@@ -50,6 +50,13 @@ internal sealed class MethodPointerAsStructGenerator : IIncrementalGenerator
                 MethodPointerInfo info = new();
 
                 ReadOnlySpan<char> lineSpan = line.AsSpan();
+
+                if (lineSpan.StartsWith("[Obsolete]".AsSpan()))
+                {
+                    info.Deprecated = true;
+                    lineSpan = lineSpan.Slice(10).TrimStart(); // remove '[Obsolete]'
+                }
+
                 int firstSpaceIndex = lineSpan.IndexOf(' ');
                 info.ReturnType = ReplaceWithFullQualifiedType(lineSpan.Slice(0, lineSpan.IndexOf(' ')).ToString());
 
@@ -63,7 +70,7 @@ internal sealed class MethodPointerAsStructGenerator : IIncrementalGenerator
 
                 if (parameters.Length > 0)
                 {
-                    info.Parameters = new();
+                    info.Parameters = [];
                     foreach (string parameter in parameters.Split(','))
                     {
                         ReadOnlySpan<char> parameterSpan = parameter.Trim().AsSpan();
@@ -139,8 +146,10 @@ internal sealed class MethodPointerAsStructGenerator : IIncrementalGenerator
         foreach(MethodPointerInfo info in groupedInfo)
         {
             string delegateParameters = MakeDelegateParameters(info);
-
             string accessModifier = info.MethodName.EndsWith("Handler") ? "public" : "internal";
+            string obsoleteOrNot = info.Deprecated ? """
+                System.Obsolete("Deprecated by Discord"), 
+                """ : "";
 
             sourceBuilder.AppendLine($$"""
 
@@ -149,24 +158,24 @@ internal sealed class MethodPointerAsStructGenerator : IIncrementalGenerator
             /// <para/>
             /// {{info.ReturnType}} (*thisPtr)({{delegateParameters.Substring(0, delegateParameters.LastIndexOf(','))}})
             /// </summary>
-            [System.Diagnostics.DebuggerDisplay("Address: {DebugDisplay}")]
+            [{{obsoleteOrNot}}System.Diagnostics.DebuggerDisplay("Address: {DebugDisplay}")]
             {{accessModifier}} unsafe struct {{info.MethodName}}
             {
-                private delegate* unmanaged[Stdcall]<{{delegateParameters}}> thisPtr;
+                internal delegate* unmanaged[Stdcall]<{{delegateParameters}}> ThisPtr;
 
                 internal {{info.ReturnType}} Invoke({{MakeInvokeMethodParameters(info)}})
                 {
-                    {{(info.ReturnType is "void" ? "" : "return ")}}thisPtr({{MakePointerParameters(info)}});
+                    {{(info.ReturnType is "void" ? "" : "return ")}}ThisPtr({{MakePointerParameters(info)}});
                 }
 
                 public static {{info.MethodName}} Create(delegate* unmanaged[Stdcall]<{{delegateParameters}}> ptr)
                 {
                     {{info.MethodName}} value = default;
-                    value.thisPtr = ptr;
+                    value.ThisPtr = ptr;
                     return value;
                 }
 
-                private nint DebugDisplay => (nint)thisPtr;
+                private nint DebugDisplay => (nint)ThisPtr;
             }
             """);
         }
@@ -252,5 +261,7 @@ internal sealed class MethodPointerAsStructGenerator : IIncrementalGenerator
         public string MethodName { get; set; } = default!;
 
         public List<(string Type, string Name)> Parameters { get; set; } = default!;
+
+        public bool Deprecated { get; set; }
     }
 }

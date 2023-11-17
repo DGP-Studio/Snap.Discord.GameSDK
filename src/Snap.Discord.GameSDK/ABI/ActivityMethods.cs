@@ -1,6 +1,6 @@
 ﻿namespace Snap.Discord.GameSDK.ABI;
 
-internal struct ActivityMethods
+public struct ActivityMethods
 {
     internal RegisterCommandMethod RegisterCommand;
     internal RegisterSteamMethod RegisterSteam;

@@ -1,6 +1,6 @@
 ﻿namespace Snap.Discord.GameSDK.ABI;
 
-internal struct UserMethods
+public struct UserMethods
 {
     internal GetCurrentUserMethod GetCurrentUser;
     internal GetUserMethod GetUser;

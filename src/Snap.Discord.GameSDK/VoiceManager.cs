@@ -45,7 +45,7 @@ public class VoiceManager
             ptr.Invoke(result);
         }
 
-        MethodsPtr->SetInputMode.Invoke(MethodsPtr, inputMode, callback,SetInputModeCallback.Create(&SetInputModeCallbackImpl));
+        MethodsPtr->SetInputMode.Invoke(MethodsPtr, inputMode, callback, SetInputModeCallback.Create(&SetInputModeCallbackImpl));
     }
 
     [Obsolete("Deprecated by Discord")]

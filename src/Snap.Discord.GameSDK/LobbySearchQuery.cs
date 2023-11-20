@@ -16,10 +16,10 @@ public struct LobbySearchQuery
         if (MethodsPtr is not null)
         {
             byte[] keyBytes = Encoding.UTF8.GetBytes(key);
-            fixed(byte* pKey = keyBytes)
+            fixed (byte* pKey = keyBytes)
             {
                 byte[] valueBytes = Encoding.UTF8.GetBytes(value);
-                fixed(byte* pValue = valueBytes)
+                fixed (byte* pValue = valueBytes)
                 {
                     MethodsPtr->Filter.Invoke(MethodsPtr, pKey, comparison, cast, pValue).ThrowOnFailure();
                 }
@@ -33,10 +33,10 @@ public struct LobbySearchQuery
         if (MethodsPtr is not null)
         {
             byte[] keyBytes = Encoding.UTF8.GetBytes(key);
-            fixed(byte* pKey = keyBytes)
+            fixed (byte* pKey = keyBytes)
             {
                 byte[] valueBytes = Encoding.UTF8.GetBytes(value);
-                fixed(byte* pValue = valueBytes)
+                fixed (byte* pValue = valueBytes)
                 {
                     MethodsPtr->Sort.Invoke(MethodsPtr, pKey, cast, pValue).ThrowOnFailure();
                 }

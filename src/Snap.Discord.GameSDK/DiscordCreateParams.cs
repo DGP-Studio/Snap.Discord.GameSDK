@@ -1,5 +1,4 @@
 ﻿using Snap.Discord.GameSDK.ABI;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Snap.Discord.GameSDK;
 

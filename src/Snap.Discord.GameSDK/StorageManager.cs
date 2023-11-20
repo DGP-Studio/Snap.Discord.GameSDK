@@ -156,7 +156,7 @@ public class StorageManager
     public unsafe string GetPath()
     {
         byte[] ret = new byte[4096];
-        fixed(byte* pRet = ret)
+        fixed (byte* pRet = ret)
         {
             MethodsPtr->GetPath.Invoke(MethodsPtr, pRet).ThrowOnFailure();
             return Encoding.UTF8.GetString(MemoryMarshal.CreateReadOnlySpanFromNullTerminated(pRet));

@@ -5,15 +5,21 @@ using System.Runtime.InteropServices;
 
 namespace Snap.Discord.GameSDK;
 
+public unsafe delegate TManager ManagerFactory<TMethods, TEvents, TManager>(TMethods* manager, TEvents* events)
+    where TMethods : unmanaged
+    where TEvents : unmanaged;
+
 public sealed class Discord : IDisposable
 {
     [DllImport("discord_game_sdk", ExactSpelling = true, CallingConvention = CallingConvention.Winapi)]
-    private static extern unsafe Result DiscordCreate(uint version, DiscordCreateParams* createParams, /* out */ DiscordMethods** manager);
+    private static extern unsafe Result DiscordCreate(uint version, DiscordCreateParams* createParams, DiscordMethods** manager);
 
-    private readonly nint SelfHandle;
+    private readonly nint selfHandle;
 
     private unsafe readonly DiscordAllEvents* AllEventsPtr;
     private unsafe readonly DiscordMethods* MethodsPtr;
+
+    private bool disposed;
 
     [Obsolete("Deprecated by Discord")]
     internal ApplicationManager? ApplicationManagerInstance;
@@ -33,7 +39,10 @@ public sealed class Discord : IDisposable
 
     [Obsolete("Deprecated by Discord")]
     internal StorageManager? StorageManagerInstance;
+
+    [Obsolete("Deprecated by Discord")]
     internal StoreManager? StoreManagerInstance;
+
     [Obsolete("Deprecated by Discord")]
     internal VoiceManager? VoiceManagerInstance;
 
@@ -47,10 +56,11 @@ public sealed class Discord : IDisposable
     /// <param name="flags">the creation parameters for the SDK</param>
     public unsafe Discord(long clientId, CreateFlags flags)
     {
+        ClientId = clientId;
         AllEventsPtr = UnsafeNativeMemory.Alloc<DiscordAllEvents>();
-        SelfHandle = DiscordGCHandle.Alloc(this);
+        selfHandle = DiscordGCHandle.Alloc(this);
 
-        DiscordCreateParams createParams = DiscordCreateParams.Create(clientId, flags, AllEventsPtr, SelfHandle);
+        DiscordCreateParams createParams = DiscordCreateParams.Create(clientId, flags, AllEventsPtr, selfHandle);
 
         try
         {
@@ -67,19 +77,22 @@ public sealed class Discord : IDisposable
         }
     }
 
+    ~Discord()
+    {
+        Dispose(false);
+    }
+
+    public bool Disposed { get => disposed; }
+
+    public long ClientId { get; private set; }
+
     /// <summary>
     /// Destroys the instance. Wave goodbye, Nelly! You monster.
     /// </summary>
     public unsafe void Dispose()
     {
-        if (MethodsPtr is not null)
-        {
-            MethodsPtr->Destroy.Invoke(MethodsPtr);
-        }
-
-        DiscordGCHandle.Free(SelfHandle);
-        NativeMemory.Free(AllEventsPtr);
-        NativeMemory.Free(MethodsPtr);
+        Dispose(true);
+        GC.SuppressFinalize(this);
     }
 
     /// <summary>
@@ -124,6 +137,13 @@ public sealed class Discord : IDisposable
         return UserManagerInstance ??= new UserManager(MethodsPtr->GetUserManager.Invoke(MethodsPtr), &AllEventsPtr->UserEvents);
     }
 
+    /// <inheritdoc cref="GetUserManager()"/>
+    public unsafe UserManager GetUserManager<TUserManager>(ManagerFactory<UserMethods, UserEvents, TUserManager> factory)
+        where TUserManager : UserManager
+    {
+        return UserManagerInstance ??= factory(MethodsPtr->GetUserManager.Invoke(MethodsPtr), &AllEventsPtr->UserEvents);
+    }
+
     [Obsolete("Deprecated by Discord")]
     public unsafe ImageManager GetImageManager()
     {
@@ -140,6 +160,13 @@ public sealed class Discord : IDisposable
         return ActivityManagerInstance ??= new ActivityManager(MethodsPtr->GetActivityManager.Invoke(MethodsPtr), &AllEventsPtr->ActivityEvents);
     }
 
+    /// <inheritdoc cref="GetActivityManager()"/>
+    public unsafe ActivityManager GetActivityManager<TActivityManager>(ManagerFactory<ActivityMethods, ActivityEvents, TActivityManager> factory)
+        where TActivityManager : ActivityManager
+    {
+        return ActivityManagerInstance ??= factory(MethodsPtr->GetActivityManager.Invoke(MethodsPtr), &AllEventsPtr->ActivityEvents);
+    }
+
     /// <summary>
     /// Fetches an instance of the manager for interfacing with relationships in the SDK.
     /// for users' social relationships across Discord, including friends list
@@ -148,6 +175,13 @@ public sealed class Discord : IDisposable
     public unsafe RelationshipManager GetRelationshipManager()
     {
         return RelationshipManagerInstance ??= new RelationshipManager(MethodsPtr->GetRelationshipManager.Invoke(MethodsPtr), &AllEventsPtr->RelationshipEvents);
+    }
+
+    /// <inheritdoc cref="GetRelationshipManager()"/>
+    public unsafe RelationshipManager GetRelationshipManager<TRelationshipManager>(ManagerFactory<RelationshipMethods, RelationshipEvents, TRelationshipManager> factory)
+        where TRelationshipManager : RelationshipManager
+    {
+        return RelationshipManagerInstance ??= factory(MethodsPtr->GetRelationshipManager.Invoke(MethodsPtr), &AllEventsPtr->RelationshipEvents);
     }
 
     [Obsolete("Deprecated by Discord")]
@@ -172,6 +206,13 @@ public sealed class Discord : IDisposable
         return OverlayManagerInstance ??= new OverlayManager(MethodsPtr->GetOverlayManager.Invoke(MethodsPtr), &AllEventsPtr->OverlayEvents);
     }
 
+    /// <inheritdoc cref="GetOverlayManager()"/>
+    public unsafe OverlayManager GetOverlayManager<TOverlayManager>(ManagerFactory<OverlayMethods, OverlayEvents, TOverlayManager> factory)
+        where TOverlayManager : OverlayManager
+    {
+        return OverlayManagerInstance ??= factory(MethodsPtr->GetOverlayManager.Invoke(MethodsPtr), &AllEventsPtr->OverlayEvents);
+    }
+
     [Obsolete("Deprecated by Discord")]
     public unsafe StorageManager GetStorageManager()
     {
@@ -194,5 +235,27 @@ public sealed class Discord : IDisposable
     public unsafe AchievementManager GetAchievementManager()
     {
         return AchievementManagerInstance ??= new AchievementManager(MethodsPtr->GetAchievementManager.Invoke(MethodsPtr), &AllEventsPtr->AchievementEvents);
+    }
+
+    private unsafe void Dispose(bool disposing)
+    {
+        if (!disposed)
+        {
+            if (disposing)
+            {
+                // Release managed resources, which is null for us
+            }
+
+            if (MethodsPtr is not null)
+            {
+                MethodsPtr->Destroy.Invoke(MethodsPtr);
+            }
+
+            DiscordGCHandle.Free(selfHandle);
+            NativeMemory.Free(AllEventsPtr);
+            NativeMemory.Free(MethodsPtr);
+
+            disposed = true;
+        }
     }
 }

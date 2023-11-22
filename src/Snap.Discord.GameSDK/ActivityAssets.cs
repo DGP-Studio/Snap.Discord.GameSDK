@@ -1,9 +1,4 @@
-﻿using System;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Text.Unicode;
-
-namespace Snap.Discord.GameSDK;
+﻿namespace Snap.Discord.GameSDK;
 
 public struct ActivityAssets
 {
@@ -19,18 +14,17 @@ public struct ActivityAssets
     {
         get
         {
+            
             fixed (byte* ptr = largeImage)
             {
-                return Encoding.UTF8.GetString(MemoryMarshal.CreateReadOnlySpanFromNullTerminated(ptr));
+                return ByteString.Get(ptr);
             }
         }
         set
         {
             fixed (byte* ptr = largeImage)
             {
-                Span<byte> target = new(ptr, 128);
-                target.Clear();
-                Utf8.FromUtf16(value, target, out _, out _);
+                ByteString.Set(ptr, 128, value);
             }
         }
     }
@@ -44,16 +38,14 @@ public struct ActivityAssets
         {
             fixed (byte* ptr = largeText)
             {
-                return Encoding.UTF8.GetString(MemoryMarshal.CreateReadOnlySpanFromNullTerminated(ptr));
+                return ByteString.Get(ptr);
             }
         }
         set
         {
             fixed (byte* ptr = largeText)
             {
-                Span<byte> target = new(ptr, 128);
-                target.Clear();
-                Utf8.FromUtf16(value, target, out _, out _);
+                ByteString.Set(ptr, 128, value);
             }
         }
     }
@@ -67,16 +59,14 @@ public struct ActivityAssets
         {
             fixed (byte* ptr = smallImage)
             {
-                return Encoding.UTF8.GetString(MemoryMarshal.CreateReadOnlySpanFromNullTerminated(ptr));
+                return ByteString.Get(ptr);
             }
         }
         set
         {
             fixed (byte* ptr = smallImage)
             {
-                Span<byte> target = new(ptr, 128);
-                target.Clear();
-                Utf8.FromUtf16(value, target, out _, out _);
+                ByteString.Set(ptr, 128, value);
             }
         }
     }
@@ -90,16 +80,14 @@ public struct ActivityAssets
         {
             fixed (byte* ptr = smallText)
             {
-                return Encoding.UTF8.GetString(MemoryMarshal.CreateReadOnlySpanFromNullTerminated(ptr));
+                return ByteString.Get(ptr);
             }
         }
         set
         {
             fixed (byte* ptr = smallText)
             {
-                Span<byte> target = new(ptr, 128);
-                target.Clear();
-                Utf8.FromUtf16(value, target, out _, out _);
+                ByteString.Set(ptr, 128, value);
             }
         }
     }

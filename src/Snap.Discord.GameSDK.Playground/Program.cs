@@ -9,32 +9,34 @@ internal class Program
 {
     static async Task Main()
     {
-        Discord discord = new(1173950861647552623L, CreateFlags.NoRequireDiscord);
-        SetLogHook(discord);
-
-        ThreadPool.QueueUserWorkItem(obj =>
+        using (Discord discord = new(1173950861647552623L, CreateFlags.NoRequireDiscord))
         {
-            Discord d = (Discord)obj!;
-            while (true)
+            SetLogHook(discord);
+
+            ThreadPool.QueueUserWorkItem(obj =>
             {
-                Thread.Sleep(100);
-                d.RunCallbacks();
-            }
-        }, discord);
+                Discord d = (Discord)obj!;
+                while (true)
+                {
+                    Thread.Sleep(100);
+                    d.RunCallbacks();
+                }
+            }, discord);
 
-        ActivityManager activityManager = discord.GetActivityManager();
+            ActivityManager activityManager = discord.GetActivityManager();
 
-        Activity activity = default;
-        activity.State = "服务器：天空岛";
-        activity.Details = "在提瓦特大陆中探索";
-        activity.Timestamps.Start = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-        activity.Assets.LargeImage = "icon";
-        activity.Assets.LargeText = "原神";
-        activity.Assets.SmallImage = "hutaoicon2";
-        activity.Assets.SmallText = "使用 Snap Hutao 启动";
-        Result result = await activityManager.UpdateActivityAsync(activity);
-        Console.WriteLine($"UpdateActivity Result: {result}");
-        Console.ReadLine();
+            Activity activity = default;
+            activity.State = "服务器：天空岛";
+            activity.Details = "在提瓦特大陆中探索";
+            activity.Timestamps.Start = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            activity.Assets.LargeImage = "icon";
+            activity.Assets.LargeText = "原神";
+            activity.Assets.SmallImage = "hutaoicon2";
+            activity.Assets.SmallText = "使用 Snap Hutao 启动";
+            Result result = await activityManager.UpdateActivityAsync(activity);
+            Console.WriteLine($"UpdateActivity Result: {result}");
+            Console.ReadLine();
+        }
     }
 
     private static unsafe void SetLogHook(Discord discord)

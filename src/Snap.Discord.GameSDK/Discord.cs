@@ -246,6 +246,8 @@ public sealed class Discord : IDisposable
                 // Release managed resources, which is null for us
             }
 
+            // Seems like sdk handles the memory free
+            // we don't want to call NativeMemory.Free(MethodsPtr) here
             if (MethodsPtr is not null)
             {
                 MethodsPtr->Destroy.Invoke(MethodsPtr);
@@ -253,7 +255,6 @@ public sealed class Discord : IDisposable
 
             DiscordGCHandle.Free(selfHandle);
             NativeMemory.Free(AllEventsPtr);
-            NativeMemory.Free(MethodsPtr);
 
             disposed = true;
         }

@@ -20,6 +20,7 @@ public sealed class Discord : IDisposable
     private unsafe readonly DiscordMethods* MethodsPtr;
 
     private bool disposed;
+    private readonly CreateFlags flags;
 
     [Obsolete("Deprecated by Discord")]
     internal ApplicationManager? ApplicationManagerInstance;
@@ -57,6 +58,7 @@ public sealed class Discord : IDisposable
     public unsafe Discord(long clientId, CreateFlags flags)
     {
         ClientId = clientId;
+        this.flags = flags;
         AllEventsPtr = UnsafeNativeMemory.Alloc<DiscordAllEvents>();
         selfHandle = DiscordGCHandle.Alloc(this);
 
@@ -70,9 +72,10 @@ public sealed class Discord : IDisposable
                 DiscordCreate(3, &createParams, ppv).ThrowOnFailure();
             }
         }
-        catch
+        catch (ResultException)
         {
-            Dispose();
+            Dispose(true, true);
+            GC.SuppressFinalize(this);
             throw;
         }
     }
@@ -81,6 +84,8 @@ public sealed class Discord : IDisposable
     {
         Dispose(false);
     }
+
+    public CreateFlags CreateFlags { get => flags; }
 
     public bool Disposed { get => disposed; }
 
@@ -237,26 +242,35 @@ public sealed class Discord : IDisposable
         return AchievementManagerInstance ??= new AchievementManager(MethodsPtr->GetAchievementManager.Invoke(MethodsPtr), &AllEventsPtr->AchievementEvents);
     }
 
-    private unsafe void Dispose(bool disposing)
+    private unsafe void Dispose(bool disposing, bool ctor = false)
     {
-        if (!disposed)
+        if (disposed)
         {
-            if (disposing)
-            {
-                // Release managed resources, which is null for us
-            }
+            return;
+        }
 
+        if (disposing)
+        {
+            // Release managed resources, which is null for us
+        }
+
+        if (ctor && CreateFlags is CreateFlags.NoRequireDiscord)
+        {
+            // InternalError, MethodsPtr has been destroyed by sdk
+        }
+        else
+        {
             // Seems like sdk handles the memory free
             // we don't want to call NativeMemory.Free(MethodsPtr) here
             if (MethodsPtr is not null)
             {
                 MethodsPtr->Destroy.Invoke(MethodsPtr);
             }
-
-            DiscordGCHandle.Free(selfHandle);
-            NativeMemory.Free(AllEventsPtr);
-
-            disposed = true;
         }
+
+        DiscordGCHandle.Free(selfHandle);
+        NativeMemory.Free(AllEventsPtr);
+
+        disposed = true;
     }
 }

@@ -1,53 +1,48 @@
 ﻿using Snap.Discord.GameSDK.ABI;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Text;
 
 namespace Snap.Discord.GameSDK.Playground;
 
 internal class Program
 {
-    static async Task Main()
+    static unsafe void Main()
     {
-        using (Discord discord = new(1173950861647552623L, CreateFlags.NoRequireDiscord))
+        ABI.DiscordCreateParams @params = default;
+        Methods.DiscordCreateParamsSetDefault(&@params);
+        @params.client_id = 1173950861647552623L;
+        @params.flags = (uint)DiscordCreateFlags.Default;
+        IDiscordCore* core;
+        Methods.DiscordCreate(3, &@params, &core);
+
+        ThreadPool.QueueUserWorkItem(obj =>
         {
-            SetLogHook(discord);
-
-            ThreadPool.QueueUserWorkItem(obj =>
+            IDiscordCore* d = (IDiscordCore*)(nint)obj!;
+            while (true)
             {
-                Discord d = (Discord)obj!;
-                while (true)
-                {
-                    Thread.Sleep(100);
-                    d.RunCallbacks();
-                }
-            }, discord);
+                Thread.Sleep(100);
+                d->run_callbacks(d);
+            }
+        }, (nint)core);
 
-            ActivityManager activityManager = discord.GetActivityManager();
+        IDiscordActivityManager* discordActivityManager = core->get_activity_manager(core);
 
-            Activity activity = default;
-            activity.State = "服务器：天空岛";
-            activity.Details = "在提瓦特大陆中探索";
-            activity.Timestamps.Start = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-            activity.Assets.LargeImage = "icon";
-            activity.Assets.LargeText = "原神";
-            activity.Assets.SmallImage = "hutaoicon2";
-            activity.Assets.SmallText = "使用 Snap Hutao 启动";
-            Result result = await activityManager.UpdateActivityAsync(activity);
-            Console.WriteLine($"UpdateActivity Result: {result}");
-            Console.ReadLine();
-        }
+        DiscordActivity activity1 = default;
+        SByteString.Set(activity1.state, 128, "服务器：天空岛");
+        SByteString.Set(activity1.details, 128, "在提瓦特大陆中探索");
+        activity1.timestamps.start = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        SByteString.Set(activity1.assets.large_image, 128, "icon");
+        SByteString.Set(activity1.assets.large_text, 128, "原神");
+        SByteString.Set(activity1.assets.small_image, 128, "hutaoicon2");
+        SByteString.Set(activity1.assets.small_text, 128, "使用 Snap Hutao 启动");
+        discordActivityManager->update_activity(discordActivityManager, &activity1, null, &UpdateActivity);
+
+        Console.ReadKey();
     }
 
-    private static unsafe void SetLogHook(Discord discord)
+    [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
+    private static unsafe void UpdateActivity(void* any, DiscordResult result)
     {
-        discord.SetLogHook(LogLevel.Debug, SetLogHookHandler.Create(&LogMessage));
-    }
-
-    [UnmanagedCallersOnly(CallConvs = [typeof(CallConvStdcall)])]
-    private static unsafe void LogMessage(LogLevel level, byte* message)
-    {
-        string msg = Encoding.UTF8.GetString(MemoryMarshal.CreateReadOnlySpanFromNullTerminated(message));
-        Console.WriteLine($"[{level}] {msg}");
+        Console.WriteLine($"UpdateActivity Result: {result}");
     }
 }

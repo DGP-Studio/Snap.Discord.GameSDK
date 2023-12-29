@@ -11,19 +11,13 @@
     <Description>.NET Discord GameSDK Wrapper</Description>
     <PackageProjectUrl>https://github.com/DGP-Studio/Snap.Discord.GameSDK</PackageProjectUrl>
     <RepositoryUrl>https://github.com/DGP-Studio/Snap.Discord.GameSDK</RepositoryUrl>
-    <Version>1.5.0</Version>
+    <Version>1.6.0</Version>
     <PackageLicenseUrl>https://github.com/DGP-Studio/Snap.Discord.GameSDK/blob/main/LICENSE</PackageLicenseUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <GenerateDocumentationFile>True</GenerateDocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="ABI\ProtoTypes.txt" />
     <None Remove="discord_game_sdk.dll" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <AdditionalFiles Include="ABI\ProtoTypes.txt" />
   </ItemGroup>
 
   <ItemGroup>
@@ -38,10 +32,6 @@
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\Snap.Discord.GameSDK.SourceGeneration\Snap.Discord.GameSDK.SourceGeneration.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" SetTargetFramework="TargetFramework=netstandard2.0" />
   </ItemGroup>
 
 </Project>
